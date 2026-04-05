@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VAULTFLIP — Intelligence de marché métaux précieux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #09090b;
+  --bg2:      #111113;
+  --bg3:      #18181c;
+  --bg4:      #212126;
+  --bg5:      #2a2a30;
+  --border:   rgba(255,255,255,0.06);
+  --border2:  rgba(255,255,255,0.11);
+  --border3:  rgba(255,255,255,0.18);
+  --text:     #f4f2ee;
+  --text2:    #8a8880;
+  --text3:    #4a4845;
+  --gold:     #c9a84c;
+  --gold2:    #e8c97a;
+  --gold3:    #f5dfa0;
+  --gold-bg:  rgba(201,168,76,0.07);
+  --gold-bdr: rgba(201,168,76,0.2);
+  --silver:   #a8b5c2;
+  --silver2:  #d0dde8;
+  --silver-bg:rgba(168,181,194,0.07);
+  --silver-bdr:rgba(168,181,194,0.2);
+  --green:    #52d68a;
+  --green2:   #22c55e;
+  --green-bg: rgba(82,214,138,0.07);
+  --green-bdr:rgba(82,214,138,0.18);
+  --red:      #f87171;
+  --red-bg:   rgba(248,113,113,0.07);
+  --blue:     #67b2f8;
+  --blue-bg:  rgba(103,178,248,0.07);
+  --amber:    #fbbf24;
+  --amber-bg: rgba(251,191,36,0.07);
+  --purple:   #c084fc;
+  --purple-bg:rgba(192,132,252,0.07);
+  --r:        14px;
+  --r-sm:     8px;
+  --r-lg:     20px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  font-size:14px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.app{display:flex;min-height:100vh;}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════ */
+.sidebar{
+  width:260px;flex-shrink:0;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  position:fixed;top:0;left:0;height:100vh;
+  z-index:100;display:flex;flex-direction:column;
+  overflow-y:auto;
+}
+.sidebar::-webkit-scrollbar{width:0;}
+
+.sidebar-brand{
+  padding:28px 22px 20px;
+  border-bottom:1px solid var(--border);
+}
+.brand-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px;font-weight:600;
+  letter-spacing:0.04em;
+  background:linear-gradient(135deg,var(--gold2),var(--gold3),var(--silver2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;margin-bottom:4px;
+}
+.brand-sub{
+  font-size:10px;color:var(--text3);letter-spacing:0.15em;
+  text-transform:uppercase;font-family:'DM Mono',monospace;
+}
+
+/* Metal ticker dans sidebar */
+.metal-ticker{margin:14px 14px 0;}
+.ticker-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px;
+  cursor:pointer;transition:border-color .2s;
+}
+.ticker-card:hover{border-color:var(--border2);}
+.ticker-card.gold-card{border-left:2px solid var(--gold);}
+.ticker-card.silver-card{border-left:2px solid var(--silver);}
+.ticker-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.ticker-name{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;}
+.ticker-change{font-size:10px;font-family:'DM Mono',monospace;padding:2px 7px;border-radius:20px;}
+.up{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr);}
+.down{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,.18);}
+.ticker-price{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;margin-bottom:1px;}
+.ticker-price.gold-price{color:var(--gold2);}
+.ticker-price.silver-price{color:var(--silver2);}
+.ticker-sub{font-size:11px;color:var(--text3);display:flex;gap:10px;}
+.ticker-sub span{display:flex;align-items:center;gap:3px;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.8s infinite;display:inline-block;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* NAV */
+.nav-block{padding:10px 12px 4px;}
+.nav-label{font-size:9px;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;font-family:'DM Mono',monospace;padding:0 10px;margin-bottom:6px;}
+.nav-btn{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:var(--r-sm);
+  border:none;background:none;color:var(--text2);
+  font-size:13px;font-family:'Outfit',sans-serif;
+  cursor:pointer;text-align:left;transition:all .15s;
+  position:relative;
+}
+.nav-btn:hover{background:var(--bg3);color:var(--text);}
+.nav-btn.active{background:var(--bg4);color:var(--text);}
+.nav-btn.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:2px;height:18px;background:var(--gold);border-radius:1px;}
+.nav-icon{font-size:14px;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--green2);color:#000;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;font-family:'DM Mono',monospace;}
+.nav-badge-warn{background:var(--amber);color:#000;}
+
+.sidebar-stats{
+  margin-top:auto;padding:16px 14px;
+  border-top:1px solid var(--border);
+}
+.stat-mini{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px;font-family:'DM Mono',monospace;}
+.stat-mini span:last-child{color:var(--text2);}
+
+/* ═══════════════════════════════════════════
+   MAIN
+═══════════════════════════════════════════ */
+.main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* TOPBAR */
+.topbar{
+  background:rgba(9,9,11,.9);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(12px);
+}
+.topbar-left{display:flex;align-items:center;gap:16px;}
+.topbar-title{font-size:15px;font-weight:500;}
+.topbar-crumb{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.topbar-metal{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:20px;
+  font-family:'DM Mono',monospace;font-size:12px;
+}
+.tb-gold{background:var(--gold-bg);color:var(--gold2);border:1px solid var(--gold-bdr);}
+.tb-silver{background:var(--silver-bg);color:var(--silver2);border:1px solid var(--silver-bdr);}
+.scan-badge{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr);padding:5px 12px;border-radius:20px;font-size:11px;display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;}
+
+/* CONTENT */
+.content{padding:28px;flex:1;}
+
+/* ═══════════════════════════════════════════
+   PAGES
+═══════════════════════════════════════════ */
+.page{display:none;}
+.page.active{display:block;animation:fadeUp .25s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE HEADER */
+.page-hd{margin-bottom:24px;}
+.page-hd h1{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:500;line-height:1.1;margin-bottom:6px;}
+.page-hd p{font-size:13px;color:var(--text3);}
+
+/* ═══════════════════════════════════════════
+   ALERT BANNER
+═══════════════════════════════════════════ */
+.alert-banner{
+  background:var(--green-bg);border:1px solid var(--green-bdr);
+  border-radius:var(--r-sm);padding:11px 16px;margin-bottom:20px;
+  font-size:13px;color:var(--green);display:flex;align-items:center;gap:8px;
+  animation:fadeUp .3s ease;
+}
+
+/* ═══════════════════════════════════════════
+   FILTER CHIPS
+═══════════════════════════════════════════ */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.chip{
+  padding:6px 14px;border-radius:20px;font-size:12px;
+  border:1px solid var(--border2);color:var(--text2);background:var(--bg3);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+  font-family:'Outfit',sans-serif;
+}
+.chip:hover{border-color:var(--gold);color:var(--gold);}
+.chip.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:600;}
+
+/* ═══════════════════════════════════════════
+   ARTICLE CARDS GRID
+═══════════════════════════════════════════ */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;}
+
+.a-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px;cursor:pointer;
+  transition:border-color .2s,transform .2s;position:relative;overflow:hidden;
+}
+.a-card::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 70% 0%,rgba(201,168,76,.04),transparent 60%);
+  pointer-events:none;
+}
+.a-card.hot{border-top:1.5px solid var(--green);}
+.a-card.hot::before{content:'OPPORTUNITÉ';position:absolute;top:0;right:14px;font-size:8px;letter-spacing:.12em;color:var(--green);font-family:'DM Mono',monospace;padding-top:3px;}
+.a-card:hover{border-color:var(--border3);transform:translateY(-2px);}
+
+.a-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px;}
+.a-title{font-size:14px;font-weight:500;line-height:1.4;flex:1;}
+.src-pill{font-size:9px;padding:3px 8px;border-radius:6px;white-space:nowrap;font-family:'DM Mono',monospace;font-weight:500;letter-spacing:.04em;}
+.s-lbc{background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.2);}
+.s-vint{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(103,178,248,.2);}
+.s-ebay{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,.2);}
+.s-cdp{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(192,132,252,.2);}
+
+.a-prices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+.p-cell{background:var(--bg3);border-radius:var(--r-sm);padding:9px 10px;}
+.p-lbl{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.p-val{font-size:17px;font-family:'DM Mono',monospace;font-weight:500;}
+.p-sub{font-size:9px;color:var(--text3);margin-top:1px;font-family:'DM Mono',monospace;}
+.col-red{color:var(--red);}
+.col-blue{color:var(--blue);}
+.col-green{color:var(--green);}
+.col-gold{color:var(--gold2);}
+.col-silver{color:var(--silver2);}
+
+.progress-bar{height:2px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-bottom:10px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green2),var(--green));border-radius:2px;}
+
+.a-bot{display:flex;justify-content:space-between;align-items:center;}
+.a-time{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;}
+.roi-pill{font-size:11px;padding:4px 11px;border-radius:20px;font-weight:600;font-family:'DM Mono',monospace;}
+.roi-fire{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr);}
+.roi-ok{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(251,191,36,.2);}
+.roi-low{background:var(--bg3);color:var(--text3);border:1px solid var(--border2);}
+
+/* Note frais de port */
+.a-shipping{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:6px;display:flex;align-items:center;gap:4px;}
+.a-shipping strong{color:var(--text2);}
+
+/* ═══════════════════════════════════════════
+   TOP AFFAIRES — HORIZONTAL SLIDER
+═══════════════════════════════════════════ */
+.podium-row{display:flex;gap:12px;overflow-x:auto;padding-bottom:14px;margin-bottom:28px;scrollbar-width:thin;scrollbar-color:var(--bg5) transparent;}
+.podium-row::-webkit-scrollbar{height:3px;}
+.podium-row::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px;}
+
+.podium-card{
+  min-width:220px;flex-shrink:0;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px;cursor:pointer;
+  transition:border-color .2s;position:relative;overflow:hidden;
+}
+.podium-card.rank-1{border-color:var(--gold);background:linear-gradient(135deg,rgba(201,168,76,.06),var(--bg2));}
+.podium-card.rank-2{border-color:var(--silver);}
+.podium-card.rank-3{border-color:rgba(205,127,50,.4);}
+.podium-card:hover{border-color:var(--border3);}
+.podium-rank{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px;}
+.podium-roi{font-size:36px;font-family:'DM Mono',monospace;font-weight:500;line-height:1;margin-bottom:8px;}
+.podium-roi.col-gold{color:var(--gold2);}
+.podium-title{font-size:12px;color:var(--text2);line-height:1.4;margin-bottom:12px;}
+.podium-profit{font-size:22px;font-family:'DM Mono',monospace;font-weight:600;}
+.podium-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+
+/* ═══════════════════════════════════════════
+   CATÉGORIES
+═══════════════════════════════════════════ */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:28px;}
+.cat-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px 18px;cursor:pointer;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.cat-card:hover{border-color:var(--gold-bdr);background:var(--bg3);}
+.cat-card.selected{border-color:var(--gold);background:linear-gradient(135deg,var(--gold-bg),var(--bg2));}
+.cat-icon-wrap{font-size:28px;margin-bottom:12px;}
+.cat-name{font-size:14px;font-weight:600;margin-bottom:4px;}
+.cat-desc{font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:10px;}
+.cat-stats{display:flex;gap:10px;}
+.cat-stat{font-size:10px;font-family:'DM Mono',monospace;}
+.cat-stat .val{color:var(--green);}
+.cat-stat .lbl{color:var(--text3);}
+.cat-profit-badge{
+  position:absolute;top:14px;right:14px;
+  font-size:10px;font-family:'DM Mono',monospace;
+  padding:3px 8px;border-radius:20px;
+}
+
+/* ═══════════════════════════════════════════
+   SECTION LABEL
+═══════════════════════════════════════════ */
+.section-lbl{
+  font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;
+  text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ═══════════════════════════════════════════
+   PORTEFEUILLE
+═══════════════════════════════════════════ */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-bottom:24px;}
+.kpi{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden;
+}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;}
+.kpi.k-invest::before{background:linear-gradient(90deg,var(--red),transparent);}
+.kpi.k-marche::before{background:linear-gradient(90deg,var(--blue),transparent);}
+.kpi.k-pv::before{background:linear-gradient(90deg,var(--green),transparent);}
+.kpi.k-count::before{background:linear-gradient(90deg,var(--gold),transparent);}
+.kpi.k-roi::before{background:linear-gradient(90deg,var(--purple),transparent);}
+.kpi-lbl{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.kpi-val{font-size:24px;font-family:'DM Mono',monospace;font-weight:500;}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:3px;font-family:'DM Mono',monospace;}
+
+/* Spot info bar */
+.spot-bar{
+  background:linear-gradient(135deg,rgba(201,168,76,.06),rgba(168,181,194,.04));
+  border:1px solid var(--gold-bdr);border-radius:var(--r);
+  padding:14px 20px;margin-bottom:20px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+}
+.spot-bar-metals{display:flex;gap:24px;flex-wrap:wrap;}
+.spot-metal{display:flex;flex-direction:column;}
+.spot-metal-name{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;}
+.spot-metal-val{font-size:20px;font-family:'DM Mono',monospace;font-weight:500;}
+.spot-metal-val.gld{color:var(--gold2);}
+.spot-metal-val.slv{color:var(--silver2);}
+.spot-metal-sub{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;}
+.spot-update{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;display:flex;align-items:center;gap:6px;}
+
+/* ADD FORM */
+.add-form{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:22px;margin-bottom:24px;
+  position:relative;overflow:hidden;
+}
+.add-form::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--gold),transparent);}
+.form-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--gold3);margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px;margin-bottom:14px;}
+.form-field{display:flex;flex-direction:column;gap:5px;}
+.form-field.full{grid-column:1/-1;}
+.f-lbl{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;}
+.f-inp,.f-sel{
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:var(--r-sm);color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:14px;
+  padding:10px 12px;width:100%;outline:none;
+  transition:border-color .15s;
+}
+.f-inp:focus,.f-sel:focus{border-color:var(--gold);}
+.f-inp::placeholder{color:var(--text3);}
+.f-sel option{background:var(--bg3);}
+.f-hint{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px;}
+
+/* Calcul preview */
+.calc-preview{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;
+}
+.calc-item{display:flex;flex-direction:column;}
+.calc-lbl{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.calc-val{font-size:16px;font-family:'DM Mono',monospace;font-weight:500;}
+
+.add-btn{
+  width:100%;padding:13px;border-radius:var(--r-sm);
+  border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--bg);font-size:14px;font-weight:700;
+  cursor:pointer;font-family:'Outfit',sans-serif;
+  transition:opacity .15s;letter-spacing:.02em;
+}
+.add-btn:hover{opacity:.9;}
+
+/* PORTFOLIO CARDS */
+.port-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:14px;}
+.port-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px;position:relative;overflow:hidden;
+}
+.port-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--gold),var(--silver),transparent);}
+.port-card.vendu{opacity:.45;}
+.port-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:8px;}
+.port-name{font-size:14px;font-weight:500;line-height:1.4;flex:1;}
+.status-dot{font-size:10px;padding:3px 9px;border-radius:20px;white-space:nowrap;font-family:'DM Mono',monospace;}
+.st-stock{background:var(--bg4);color:var(--text3);border:1px solid var(--border2);}
+.st-vente{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(251,191,36,.2);}
+.st-vendu{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr);}
+
+.port-nums{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.pn-cell{background:var(--bg3);border-radius:var(--r-sm);padding:9px 8px;text-align:center;}
+.pn-lbl{font-size:8px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;line-height:1.3;}
+.pn-val{font-size:14px;font-family:'DM Mono',monospace;font-weight:600;}
+
+/* CONSEIL */
+.conseil{
+  background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.03));
+  border:1px solid var(--gold-bdr);border-radius:var(--r-sm);
+  padding:14px 16px;margin-bottom:12px;
+}
+.conseil-hd{font-size:9px;color:var(--gold);font-family:'DM Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.conseil-prix-row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+.conseil-prix{font-size:28px;font-family:'DM Mono',monospace;font-weight:600;color:var(--gold2);}
+.conseil-roi{font-size:16px;font-family:'DM Mono',monospace;color:var(--green);}
+.conseil-detail{font-size:11px;color:var(--text3);line-height:1.5;}
+.conseil-plancher{
+  margin-top:6px;font-size:11px;color:var(--amber);
+  background:var(--amber-bg);border-radius:4px;padding:5px 8px;
+  display:inline-block;font-family:'DM Mono',monospace;
+}
+
+.port-footer{display:flex;justify-content:space-between;align-items:center;}
+.port-meta{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;}
+.port-btns{display:flex;gap:6px;}
+.p-btn{
+  padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;
+  cursor:pointer;border:1px solid var(--border2);
+  background:none;color:var(--text2);
+  font-family:'Outfit',sans-serif;transition:all .15s;
+}
+.p-btn:hover{border-color:var(--gold);color:var(--gold);}
+.p-btn.del:hover{border-color:var(--red);color:var(--red);}
+
+/* ═══════════════════════════════════════════
+   SUGGESTIONS PAGE
+═══════════════════════════════════════════ */
+.suggest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:24px;}
+.suggest-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px;position:relative;overflow:hidden;
+}
+.suggest-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;}
+.sg-metaux::before{background:linear-gradient(90deg,var(--gold),var(--silver));}
+.sg-billets::before{background:linear-gradient(90deg,var(--green),transparent);}
+.sg-montres::before{background:linear-gradient(90deg,var(--blue),transparent);}
+.sg-luxe::before{background:linear-gradient(90deg,var(--purple),transparent);}
+.sg-livres::before{background:linear-gradient(90deg,var(--amber),transparent);}
+.sg-vin::before{background:linear-gradient(90deg,#e879f9,transparent);}
+.sg-lego::before{background:linear-gradient(90deg,var(--red),transparent);}
+.sg-vintage::before{background:linear-gradient(90deg,#fb923c,transparent);}
+.suggest-icon{font-size:32px;margin-bottom:12px;}
+.suggest-name{font-size:16px;font-weight:600;margin-bottom:4px;}
+.suggest-roi{font-size:12px;color:var(--green);font-family:'DM Mono',monospace;margin-bottom:8px;}
+.suggest-desc{font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:12px;}
+.suggest-tips{list-style:none;display:flex;flex-direction:column;gap:4px;}
+.suggest-tips li{font-size:11px;color:var(--text2);display:flex;gap:6px;}
+.suggest-tips li::before{content:'→';color:var(--gold);flex-shrink:0;}
+.suggest-badge{
+  position:absolute;top:16px;right:16px;
+  font-size:9px;font-family:'DM Mono',monospace;font-weight:600;
+  padding:3px 8px;border-radius:20px;letter-spacing:.06em;
+}
+.badge-fire{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr);}
+.badge-hot{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(251,191,36,.2);}
+.badge-niche{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(103,178,248,.2);}
+.badge-smart{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(192,132,252,.2);}
+
+/* ═══════════════════════════════════════════
+   ALERTES
+═══════════════════════════════════════════ */
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-bottom:24px;}
+.set-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+  display:flex;justify-content:space-between;align-items:center;gap:14px;
+}
+.set-info h4{font-size:14px;font-weight:500;margin-bottom:2px;}
+.set-info p{font-size:11px;color:var(--text3);}
+.set-ctrl{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.toggle{width:40px;height:22px;border-radius:11px;background:var(--bg5);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--green2);}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:white;top:3px;left:3px;transition:transform .2s;}
+.toggle.on::after{transform:translateX(18px);}
+.range-wrap{display:flex;align-items:center;gap:8px;}
+.range-wrap input[type=range]{width:80px;accent-color:var(--gold);}
+.range-val{font-family:'DM Mono',monospace;font-size:13px;min-width:40px;text-align:right;color:var(--gold2);}
+
+.hist-list{display:flex;flex-direction:column;gap:8px;}
+.hist-item{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:12px 16px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+}
+.hist-msg{font-size:13px;}
+.hist-time{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;}
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.75);z-index:300;
+  align-items:flex-end;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+@media(min-width:600px){
+  .overlay{align-items:center;padding:16px;}
+}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:var(--r-lg) var(--r-lg) 0 0;
+  width:100%;max-width:500px;
+  max-height:92vh;overflow-y:auto;
+  animation:slideUp .25s ease;
+  display:flex;flex-direction:column;
+}
+@media(min-width:600px){
+  .modal{border-radius:var(--r-lg);max-height:88vh;}
+}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal::-webkit-scrollbar{width:3px;}
+.modal::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px;}
+.modal-head{
+  padding:16px 18px 14px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:flex-start;
+  position:sticky;top:0;background:var(--bg2);z-index:2;
+}
+.modal-head h3{font-size:15px;font-weight:600;line-height:1.3;flex:1;padding-right:10px;}
+/* Drag handle mobile */
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--bg5);margin:10px auto 0;display:block;}
+/* Sticky action buttons at bottom of modal */
+.modal-actions{
+  position:sticky;bottom:0;background:var(--bg2);
+  border-top:1px solid var(--border);
+  padding:12px 18px;display:flex;flex-direction:column;gap:8px;z-index:2;
+}
+.modal-link-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px;border-radius:var(--r-sm);
+  font-size:14px;font-weight:700;text-decoration:none;
+  font-family:'Outfit',sans-serif;transition:opacity .15s;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--bg);
+}
+.modal-link-btn:hover{opacity:.85;}
+.modal-link-btn.secondary{
+  background:none;border:1px solid var(--border2);
+  color:var(--text2);font-weight:500;font-size:13px;
+}
+.modal-link-btn.secondary:hover{border-color:var(--border3);color:var(--text);}
+.modal-close-btn{
+  background:none;border:none;color:var(--text3);
+  font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;
+  padding:4px;text-align:center;
+}
+.modal-body{padding:22px;}
+
+.m-prices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.m-cell{background:var(--bg3);border-radius:var(--r-sm);padding:14px;}
+.m-lbl{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.m-val{font-size:26px;font-family:'DM Mono',monospace;font-weight:600;}
+
+.m-profit{
+  background:var(--green-bg);border:1px solid var(--green-bdr);
+  border-radius:var(--r-sm);padding:14px 16px;
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:16px;
+}
+.m-profit-val{font-size:28px;font-family:'DM Mono',monospace;color:var(--green);font-weight:600;}
+
+.m-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;}
+.m-table td{padding:8px 0;border-bottom:1px solid var(--border);}
+.m-table td:first-child{color:var(--text3);}
+.m-table td:last-child{text-align:right;font-family:'DM Mono',monospace;font-weight:500;}
+.m-table tr:last-child td{border:none;}
+
+.m-btn{
+  width:100%;padding:13px;border-radius:var(--r-sm);
+  border:1px solid var(--gold);background:transparent;
+  color:var(--gold);font-size:14px;font-weight:600;
+  cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;
+}
+.m-btn:hover{background:var(--gold);color:var(--bg);}
+
+/* ═══════════════════════════════════════════
+   MOBILE NAV
+═══════════════════════════════════════════ */
+.mobile-bar{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  background:rgba(9,9,11,.95);border-top:1px solid var(--border);
+  z-index:100;padding:8px 0 max(env(safe-area-inset-bottom),8px);
+  backdrop-filter:blur(12px);
+}
+.mob-inner{display:flex;justify-content:space-around;}
+.mob-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 10px;cursor:pointer;color:var(--text3);
+  border:none;background:none;transition:color .15s;
+  font-family:'Outfit',sans-serif;
+}
+.mob-btn.active{color:var(--gold);}
+.mob-icon{font-size:18px;}
+.mob-label{font-size:9px;font-family:'DM Mono',monospace;letter-spacing:.05em;}
+
+.mobile-topbar{
+  display:none;background:rgba(9,9,11,.9);border-bottom:1px solid var(--border);
+  padding:12px 16px;position:sticky;top:0;z-index:60;
+  align-items:center;justify-content:space-between;
+  backdrop-filter:blur(12px);
+}
+.mob-brand{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;background:linear-gradient(135deg,var(--gold2),var(--silver2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.mob-metals{display:flex;gap:8px;}
+.mob-metal{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:10px;}
+.mob-au{background:var(--gold-bg);color:var(--gold2);border:1px solid var(--gold-bdr);}
+.mob-ag{background:var(--silver-bg);color:var(--silver2);border:1px solid var(--silver-bdr);}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media(max-width:960px){
+  .sidebar{display:none;}
+  .main{margin-left:0;}
+  .topbar{display:none;}
+  .mobile-topbar{display:flex;}
+  .mobile-bar{display:block;}
+  .content{padding:16px 14px 90px;}
+  .cards-grid{grid-template-columns:1fr;}
+  .port-grid{grid-template-columns:1fr;}
+  .suggest-grid{grid-template-columns:1fr;}
+  .settings-grid{grid-template-columns:1fr;}
+  .cat-grid{grid-template-columns:1fr 1fr;}
+  .kpi-row{grid-template-columns:1fr 1fr;}
+  .form-grid{grid-template-columns:1fr 1fr;}
+  .port-nums{grid-template-columns:1fr 1fr;}
+  .m-prices{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:500px){
+  .cat-grid{grid-template-columns:1fr;}
+  .kpi-row{grid-template-columns:1fr 1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .a-prices{gap:5px;}
+  .page-hd h1{font-size:28px;}
+  .calc-preview{grid-template-columns:1fr 1fr;}
+}
+
+/* ═══════════════════════════════════════════
+   MISC UTILS
+═══════════════════════════════════════════ */
+.empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;}
+.divider{height:1px;background:var(--border);margin:24px 0;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">VAULTFLIP</div>
+    <div class="brand-sub">Intelligence · Métaux Précieux</div>
+  </div>
+
+  <div class="metal-ticker">
+    <div class="ticker-card gold-card" onclick="navigate('port')">
+      <div class="ticker-header">
+        <span class="ticker-name">Or · XAU/EUR</span>
+        <span class="ticker-change up" id="sb-gold-chg">+0.42%</span>
+      </div>
+      <div class="ticker-price gold-price" id="sb-gold-g">89,24 €/g</div>
+      <div class="ticker-sub">
+        <span id="sb-gold-oz">2 777 €/oz</span>
+        <span><span class="live-dot"></span> direct</span>
+      </div>
+    </div>
+    <div class="ticker-card silver-card" onclick="navigate('port')">
+      <div class="ticker-header">
+        <span class="ticker-name">Argent · XAG/EUR</span>
+        <span class="ticker-change up" id="sb-silver-chg">+0.18%</span>
+      </div>
+      <div class="ticker-price silver-price" id="sb-silver-g">0,93 €/g</div>
+      <div class="ticker-sub">
+        <span id="sb-silver-oz">28,95 €/oz</span>
+        <span><span class="live-dot"></span> direct</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-block">
+    <div class="nav-label">Surveillance</div>
+    <button class="nav-btn active" data-page="flux"><span class="nav-icon">📡</span>Flux récent<span class="nav-badge" id="nb-flux">3</span></button>
+    <button class="nav-btn" data-page="top"><span class="nav-icon">🏆</span>Top affaires</button>
+    <button class="nav-btn" data-page="cats"><span class="nav-icon">📂</span>Catégories</button>
+  </div>
+  <div class="nav-block">
+    <div class="nav-label">Mon activité</div>
+    <button class="nav-btn" data-page="port"><span class="nav-icon">💼</span>Portefeuille</button>
+    <button class="nav-btn" data-page="suggest"><span class="nav-icon">💡</span>Suggestions IA<span class="nav-badge nav-badge-warn">8</span></button>
+    <button class="nav-btn" data-page="alertes"><span class="nav-icon">🔔</span>Alertes</button>
+  </div>
+
+  <div class="sidebar-stats">
+    <div class="stat-mini"><span>Scan actif</span><span>toutes 5 min</span></div>
+    <div class="stat-mini"><span>Sources</span><span>LBC · Vinted · eBay · CDP</span></div>
+    <div class="stat-mini"><span>Filtres</span><span>Argent uniquement</span></div>
+    <div class="stat-mini"><span>Alertes</span><span style="color:var(--green)">actives</span></div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- Desktop topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title" id="tb-title">Flux récent</div>
+      <div class="topbar-crumb" id="tb-crumb">annonces par ordre d'arrivée</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-metal tb-gold">Au <span id="tb-gold">89,24</span> €/g</div>
+      <div class="topbar-metal tb-silver">Ag <span id="tb-silver">0,93</span> €/g</div>
+      <button id="sound-btn" onclick="toggleSound()" title="Activer/Désactiver le son des notifications" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:5px 12px;color:var(--text2);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;transition:all .15s;">🔔 Son ON</button>
+      <div class="scan-badge"><span class="live-dot"></span>Scan actif</div>
+    </div>
+  </header>
+
+  <!-- Mobile topbar -->
+  <header class="mobile-topbar">
+    <div class="mob-brand">VAULTFLIP</div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button id="sound-btn-mob" onclick="toggleSound()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:4px 10px;color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;">🔔</button>
+    <div class="mob-metals">
+      <div class="mob-metal mob-au">Au <span id="mob-gold">89,24</span>€</div>
+      <div class="mob-metal mob-ag">Ag <span id="mob-silver">0,93</span>€</div>
+    </div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ══ PAGE FLUX ══ -->
+    <div class="page active" id="page-flux">
+      <div class="page-hd">
+        <h1>Flux récent</h1>
+        <p>Nouvelles annonces en temps réel — argent uniquement, pièces nickel exclues automatiquement</p>
+      </div>
+      <div class="alert-banner">✦ 3 opportunités détectées ces 30 dernières minutes — ROI moyen estimé : +34%</div>
+      <div class="chips" id="flux-chips">
+        <div class="chip active" data-filter="all">Tout</div>
+        <div class="chip" data-filter="semeuse">⚜️ Semeuses</div>
+        <div class="chip" data-filter="hercule">💪 Hercule</div>
+        <div class="chip" data-filter="franc">🪙 Francs</div>
+        <div class="chip" data-filter="napoleon">👑 Napoléons or</div>
+        <div class="chip" data-filter="lingot">🔩 Lingots</div>
+        <div class="chip" data-filter="montre">⌚ Montres</div>
+        <div class="chip" data-filter="billet">💶 Billets</div>
+        <div class="chip" data-filter="jeux">🎮 Jeux vintage</div>
+        <div class="chip" data-filter="pokemon">⚡ Pokémon</div>
+        <div class="chip" data-filter="bd">📖 BD</div>
+        <div class="chip" data-filter="vintage">🏺 Objets vintage</div>
+        <div class="chip" data-filter="vinyle">🎵 Vinyles</div>
+        <div class="chip" data-filter="sneakers">👟 Sneakers</div>
+        <div class="chip" data-filter="lego">🧱 LEGO</div>
+      </div>
+      <div class="cards-grid" id="flux-list"></div>
+    </div>
+
+    <!-- ══ PAGE TOP ══ -->
+    <div class="page" id="page-top">
+      <div class="page-hd">
+        <h1>Top affaires</h1>
+        <p>Classées par ROI net décroissant — glissez pour naviguer dans le podium</p>
+      </div>
+      <div class="podium-row" id="top-slides"></div>
+      <div class="section-lbl">Toutes les annonces classées</div>
+      <div class="cards-grid" id="top-list"></div>
+    </div>
+
+    <!-- ══ PAGE CATS ══ -->
+    <div class="page" id="page-cats">
+      <div class="page-hd">
+        <h1>Catégories</h1>
+        <p>Filtrez les annonces par type de pièce ou métal</p>
+      </div>
+      <div class="cat-grid" id="cat-grid"></div>
+      <div class="section-lbl" id="cat-lbl">Toutes les annonces</div>
+      <div class="cards-grid" id="cat-list"></div>
+    </div>
+
+    <!-- ══ PAGE PORTEFEUILLE ══ -->
+    <div class="page" id="page-port">
+      <div class="page-hd">
+        <h1>Portefeuille</h1>
+        <p>Suivi de vos achats avec conseils de revente au cours du jour, plus-value calculée en temps réel</p>
+      </div>
+
+      <!-- Spot bar -->
+      <div class="spot-bar">
+        <div class="spot-bar-metals">
+          <div class="spot-metal">
+            <div class="spot-metal-name">Or · XAU</div>
+            <div class="spot-metal-val gld" id="port-gold-g">89,24 €/g</div>
+            <div class="spot-metal-sub" id="port-gold-oz">= 2 777 €/oz</div>
+          </div>
+          <div class="spot-metal">
+            <div class="spot-metal-name">Argent · XAG</div>
+            <div class="spot-metal-val slv" id="port-silver-g">0,93 €/g</div>
+            <div class="spot-metal-sub" id="port-silver-oz">= 28,95 €/oz</div>
+          </div>
+        </div>
+        <div class="spot-update"><span class="live-dot"></span>Cours mis à jour en direct</div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-row">
+        <div class="kpi k-invest"><div class="kpi-lbl">Investi total</div><div class="kpi-val col-red" id="k-investi">0,00 €</div><div class="kpi-sub">achat + port</div></div>
+        <div class="kpi k-marche"><div class="kpi-lbl">Valeur marché</div><div class="kpi-val col-blue" id="k-marche">0,00 €</div><div class="kpi-sub">spot + numismatique</div></div>
+        <div class="kpi k-pv"><div class="kpi-lbl">Plus-value nette</div><div class="kpi-val" id="k-pv">0,00 €</div><div class="kpi-sub" id="k-pv-sub">—</div></div>
+        <div class="kpi k-count"><div class="kpi-lbl">Pièces en stock</div><div class="kpi-val col-gold" id="k-count">0</div><div class="kpi-sub">hors vendues</div></div>
+        <div class="kpi k-roi"><div class="kpi-lbl">ROI portefeuille</div><div class="kpi-val col-green" id="k-roi">—</div><div class="kpi-sub">rendement global</div></div>
+      </div>
+
+      <!-- Formulaire d'ajout -->
+      <div class="add-form">
+        <div class="form-title">✦ Enregistrer un achat</div>
+        <div class="form-grid">
+          <div class="form-field full">
+            <label class="f-lbl">Nom de la pièce / lot</label>
+            <input class="f-inp" type="text" id="f-nom" placeholder="Ex : 5 Francs Semeuse 1960 × 3">
+          </div>
+          <div class="form-field">
+            <label class="f-lbl">Type</label>
+            <select class="f-sel" id="f-type">
+              <option value="franc">Franc argent</option>
+              <option value="semeuse">Semeuse</option>
+              <option value="hercule">Hercule</option>
+              <option value="lingot">Lingot / Barre</option>
+              <option value="napoleon">Napoléon or</option>
+              <option value="piece">Pièce étrangère</option>
+              <option value="montre">Montre</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="f-lbl">Métal</label>
+            <select class="f-sel" id="f-metal">
+              <option value="argent">Argent</option>
+              <option value="or">Or</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="f-lbl">Titre (ex : 835‰)</label>
+            <input class="f-inp" type="text" id="f-titre" placeholder="835‰">
+          </div>
+          <div class="form-field">
+            <label class="f-lbl">Prix annonce (€)</label>
+            <input class="f-inp" type="number" id="f-prix" placeholder="28" min="0" step="0.5" oninput="updateCalc()">
+            <div class="f-hint">Prix affiché sur l'annonce</div>
+          </div>
+          <div class="form-field">
+            <label class="f-lbl">Frais de port (€)</label>
+            <input class="f-inp" type="number" id="f-port" placeholder="4" min="0" step="0.5" oninput="updateCalc()">
+            <div class="f-hint">Inclus automatiquement dans le coût</div>
+          </div>
+          <div class="form-field">
+            <label class="f-lbl">Poids argent pur (g)</label>
+            <input class="f-inp" type="number" id="f-poids" placeholder="30" min="0" step="0.1" oninput="updateCalc()">
+          </div>
+          <div class="form-field">
+            <label class="f-lbl">Valeur numismatique (€)</label>
+            <input class="f-inp" type="number" id="f-numis" placeholder="0" min="0" step="1" oninput="updateCalc()">
+            <div class="f-hint">Supplément historique / état</div>
+          </div>
+          <div class="form-field">
+            <label class="f-lbl">Source</label>
+            <select class="f-sel" id="f-source">
+              <option>Leboncoin</option>
+              <option>Vinted</option>
+              <option>eBay</option>
+              <option>Delcampe</option>
+              <option>Brocante</option>
+              <option>Vide-grenier</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="f-lbl">Date d'achat</label>
+            <input class="f-inp" type="date" id="f-date">
+          </div>
+        </div>
+
+        <!-- Calc preview -->
+        <div class="calc-preview" id="calc-preview">
+          <div class="calc-item"><div class="calc-lbl">Coût total</div><div class="calc-val col-red" id="c-cout">—</div></div>
+          <div class="calc-item"><div class="calc-lbl">Valeur argent spot</div><div class="calc-val col-silver" id="c-vspot">—</div></div>
+          <div class="calc-item"><div class="calc-lbl">Valeur marché</div><div class="calc-val col-blue" id="c-vmarche">—</div></div>
+          <div class="calc-item"><div class="calc-lbl">Prix conseillé vente</div><div class="calc-val col-gold" id="c-vconseil">—</div></div>
+          <div class="calc-item"><div class="calc-lbl">Plus-value estimée</div><div class="calc-val col-green" id="c-vpv">—</div></div>
+          <div class="calc-item"><div class="calc-lbl">ROI estimé</div><div class="calc-val col-green" id="c-vroi">—</div></div>
+        </div>
+
+        <button class="add-btn" id="add-btn">Ajouter à mon portefeuille →</button>
+      </div>
+
+      <div class="section-lbl">Mes achats</div>
+      <div class="port-grid" id="port-list"></div>
+    </div>
+
+    <!-- ══ PAGE SUGGESTIONS ══ -->
+    <div class="page" id="page-suggest">
+      <div class="page-hd">
+        <h1>Suggestions IA</h1>
+        <p>8 niches d'achat-revente ultra-rentables identifiées — toutes testées, toutes scalables</p>
+      </div>
+      <div class="section-lbl">Opportunités validées par l'analyse de marché</div>
+      <div class="suggest-grid" id="suggest-grid"></div>
+    </div>
+
+    <!-- ══ PAGE ALERTES ══ -->
+    <div class="page" id="page-alertes">
+      <div class="page-hd">
+        <h1>Alertes & Paramètres</h1>
+        <p>Configurez les seuils de notification pour ne manquer aucune affaire</p>
+      </div>
+      <div class="section-lbl">Configuration des seuils</div>
+      <div class="settings-grid">
+        <div class="set-card"><div class="set-info"><h4>ROI minimum</h4><p>Alerter si le ROI dépasse ce seuil</p></div><div class="set-ctrl"><div class="range-wrap"><input type="range" id="s-roi" min="10" max="80" value="30" step="5"><span class="range-val" id="s-roi-v">30%</span></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div></div>
+        <div class="set-card"><div class="set-info"><h4>Profit net minimum (€)</h4><p>Après port et commissions plateformes</p></div><div class="set-ctrl"><div class="range-wrap"><input type="range" id="s-profit" min="5" max="150" value="20" step="5"><span class="range-val" id="s-profit-v">20€</span></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div></div>
+        <div class="set-card"><div class="set-info"><h4>Argent uniquement</h4><p>Exclure nickel, laiton, cuivre, plaqué</p></div><div class="set-ctrl"><button class="toggle on" onclick="this.classList.toggle('on')"></button></div></div>
+        <div class="set-card"><div class="set-info"><h4>Leboncoin</h4><p>Surveillance active</p></div><div class="set-ctrl"><button class="toggle on" onclick="this.classList.toggle('on')"></button></div></div>
+        <div class="set-card"><div class="set-info"><h4>Vinted</h4><p>Surveillance active</p></div><div class="set-ctrl"><button class="toggle on" onclick="this.classList.toggle('on')"></button></div></div>
+        <div class="set-card"><div class="set-info"><h4>eBay France</h4><p>Surveillance active</p></div><div class="set-ctrl"><button class="toggle on" onclick="this.classList.toggle('on')"></button></div></div>
+        <div class="set-card"><div class="set-info"><h4>Delcampe</h4><p>Spécialiste pièces de collection</p></div><div class="set-ctrl"><button class="toggle" onclick="this.classList.toggle('on')"></button></div></div>
+        <div class="set-card"><div class="set-info"><h4>Fréquence de scan</h4><p>Intervalle entre chaque vérification</p></div><div class="set-ctrl"><div class="range-wrap"><input type="range" id="s-freq" min="1" max="30" value="5" step="1"><span class="range-val" id="s-freq-v">5 min</span></div></div></div>
+        <div class="set-card"><div class="set-info"><h4>Napoléons or</h4><p>Inclure les 20F or dans les résultats</p></div><div class="set-ctrl"><button class="toggle on" onclick="this.classList.toggle('on')"></button></div></div>
+        <div class="set-card"><div class="set-info"><h4>Suggestions IA élargie</h4><p>Montres, livres, LEGO, vin</p></div><div class="set-ctrl"><button class="toggle" onclick="this.classList.toggle('on')"></button></div></div>
+      </div>
+      <div class="section-lbl">Historique des alertes</div>
+      <div class="hist-list" id="hist-list"></div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- Mobile bottom nav -->
+  <nav class="mobile-bar">
+    <div class="mob-inner">
+      <button class="mob-btn active" data-page="flux"><span class="mob-icon">📡</span><span class="mob-label">Flux</span></button>
+      <button class="mob-btn" data-page="top"><span class="mob-icon">🏆</span><span class="mob-label">Top</span></button>
+      <button class="mob-btn" data-page="cats"><span class="mob-icon">📂</span><span class="mob-label">Catégories</span></button>
+      <button class="mob-btn" data-page="port"><span class="mob-icon">💼</span><span class="mob-label">Portfolio</span></button>
+      <button class="mob-btn" data-page="suggest"><span class="mob-icon">💡</span><span class="mob-label">Idées</span></button>
+      <button class="mob-btn" data-page="alertes"><span class="mob-icon">🔔</span><span class="mob-label">Alertes</span></button>
+    </div>
+  </nav>
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <span class="modal-handle"></span>
+    <div class="modal-head">
+      <h3 id="m-title">Analyse annonce</h3>
+      <button class="modal-x" onclick="closeModal()" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);background:none;cursor:pointer;color:var(--text2);font-size:15px;flex-shrink:0;">✕</button>
+    </div>
+    <div class="modal-body" id="m-body" style="padding:16px 18px;flex:1;overflow-y:auto;"></div>
+    <div class="modal-actions" id="m-actions"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DONNÉES COURS MÉTAUX (simulées live)
+// ══════════════════════════════════════════
+let GOLD_G  = 89.24;
+let SILVER_G = 0.931;
+const OZ = 31.1035;
+
+function fmtPrice(n){ return n.toFixed(2).replace('.',','); }
+function fmtInt(n){ return Math.round(n).toLocaleString('fr-FR'); }
+
+function safeSet(id, val, prop='textContent'){ const el=document.getElementById(id); if(el) el[prop]=val; }
+function safeClass(id, cls){ const el=document.getElementById(id); if(el) el.className=cls; }
+
+function updateMetals(){
+  // Simulation légère fluctuation +/- 0.05%
+  GOLD_G   *= 1 + (Math.random()-.5)*0.001;
+  SILVER_G *= 1 + (Math.random()-.5)*0.001;
+  const goldOz = GOLD_G * OZ;
+  const silvOz = SILVER_G * OZ;
+  const goldChg = ((GOLD_G - 89.24)/89.24*100).toFixed(2);
+  const silvChg = ((SILVER_G - 0.931)/0.931*100).toFixed(2);
+
+  safeSet('sb-gold-g',   fmtPrice(GOLD_G)+' €/g');
+  safeSet('sb-silver-g', fmtPrice(SILVER_G)+' €/g');
+  safeSet('sb-gold-oz',  fmtInt(goldOz)+' €/oz');
+  safeSet('sb-silver-oz',fmtPrice(silvOz)+' €/oz');
+  safeSet('sb-gold-chg', (goldChg>=0?'+':'')+goldChg+'%');
+  safeSet('sb-silver-chg',(silvChg>=0?'+':'')+silvChg+'%');
+
+  safeClass('sb-gold-chg','ticker-change '+(goldChg>=0?'up':'down'));
+  safeClass('sb-silver-chg','ticker-change '+(silvChg>=0?'up':'down'));
+
+  safeSet('tb-gold',   fmtPrice(GOLD_G));
+  safeSet('tb-silver', fmtPrice(SILVER_G));
+  safeSet('mob-gold',  fmtPrice(GOLD_G));
+  safeSet('mob-silver',fmtPrice(SILVER_G));
+
+  safeSet('port-gold-g',  fmtPrice(GOLD_G)+' €/g');
+  safeSet('port-silver-g',fmtPrice(SILVER_G)+' €/g');
+  safeSet('port-gold-oz', '= '+fmtInt(goldOz)+' €/oz');
+  safeSet('port-silver-oz','= '+fmtPrice(silvOz)+' €/oz');
+
+  updateCalc();
+  renderPortfolio();
+}
+setInterval(updateMetals, 8000);
+
+// ══════════════════════════════════════════
+// DONNÉES ARTICLES
+// ══════════════════════════════════════════
+const ARTICLES = [
+  // ── SEMEUSES ──
+  {id:1,title:"5 Francs Semeuse 1960 argent — lot de 3",cat:"semeuse",src:"lbc",prix:28,fraisPort:4.5,revente:38,frais:3,age:"il y a 4 min",hot:true,
+   desc:"3 pièces 5F Semeuse argent 835‰. Très bel état TTB+. Vendeur particulier Normandie. Photos nettes, pièces bien identifiables.",
+   poids:"3×12g",titre:"835‰",poidsG:36,metal:"argent",
+   valSpot:null, // calculé dynamiquement
+   valNumis:38,  // valeur réelle numismatique (cote Argus/Delcampe)
+   valExplication:"La 5F Semeuse 835‰ en TTB+ cote entre 11 et 14€ pièce selon l'année. Lot de 3 = ~38€ réels. La valeur métal seule est d'environ 11€ pour les 3.",
+   auth:92, authRaison:"Photos claires, relief visible, date lisible, couleur argent cohérente. Pièce très courante, risque de faux quasi-nul.",
+   etat:"TTB+",urlRef:"https://www.cgbfr.com/5-francs-semeuse-argent",
+   url:"https://www.leboncoin.fr/recherche?text=5+francs+semeuse+argent",
+   urlRevente:"https://www.delcampe.net/fr/collections/monnaies/france/"},
+
+  {id:6,title:"50 Centimes Semeuse 1918 argent",cat:"semeuse",src:"ebay",prix:6,fraisPort:2.5,revente:8,frais:1,age:"il y a 47 min",hot:false,
+   desc:"50 centimes Semeuse argent 835‰. TTB.",poids:"2.5g",titre:"835‰",poidsG:2.5,metal:"argent",
+   valSpot:null,valNumis:8,
+   valExplication:"La 50c Semeuse vaut entre 5 et 10€ en TTB selon l'année. Valeur métal seule ~2,3€. Le supplément numismatique est modeste mais réel sur Delcampe.",
+   auth:88, authRaison:"Pièce très connue, faux rarissimes. Photos moyennes mais suffisantes. Poids cohérent avec la finesse annoncée.",
+   etat:"TTB",urlRef:"https://www.cgbfr.com/50-centimes-semeuse-argent",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=semeuse+argent+50+centimes",
+   urlRevente:"https://www.ebay.fr/sell"},
+
+  {id:7,title:"Lot 10 Semeuses 2F argent 1915–1919",cat:"semeuse",src:"lbc",prix:42,fraisPort:5,revente:60,frais:4,age:"il y a 1h 02",hot:true,
+   desc:"10×2F Semeuse argent 835‰. Années diverses TTB à SUP.",poids:"10×10g",titre:"835‰",poidsG:100,metal:"argent",
+   valSpot:null,valNumis:60,
+   valExplication:"La 2F Semeuse cote 5 à 8€ pièce en TTB, 8 à 12€ en SUP. Lot de 10 = 60 à 80€ selon état exact. Valeur métal seule ~93€ pour 100g — mais revente métal = décote. Prix collection préférable.",
+   auth:90, authRaison:"Lot bien présenté avec années visibles. Semeuses 835‰ très répandues, quasi-impossible à contrefaire de façon rentable. Présence de plusieurs dates = rassurant.",
+   etat:"TTB à SUP",urlRef:"https://www.cgbfr.com/2-francs-semeuse-argent",
+   url:"https://www.leboncoin.fr/recherche?text=lot+semeuse+argent+2+francs",
+   urlRevente:"https://www.delcampe.net/fr/collections/monnaies/france/"},
+
+  // ── FRANCS ARGENT ──
+  {id:2,title:"20 Francs Coq Marianne 1952 argent",cat:"franc",src:"ebay",prix:14,fraisPort:3,revente:16,frais:2,age:"il y a 11 min",hot:true,
+   desc:"20F Marianne Coq argent 680‰. État TTB. Vendu à l'unité.",poids:"8g",titre:"680‰",poidsG:8,metal:"argent",
+   valSpot:null,valNumis:14,
+   valExplication:"La 20F Coq Marianne vaut entre 10 et 18€ en TTB selon l'atelier. Valeur métal seule ~5,5€ (680‰ × 8g). La prime numismatique représente ici l'essentiel de la valeur. Peu d'écart d'arbitrage.",
+   auth:85, authRaison:"Pièce connue, faux rares. Attention au titre 680‰ souvent confondu avec des pièces plaquées — vérifier au poids et à l'aimant. Description eBay standard, sans signal d'alarme.",
+   etat:"TTB",urlRef:"https://www.cgbfr.com/20-francs-coq-1929-1939",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=20+francs+marianne+coq+argent+1952",
+   urlRevente:"https://www.delcampe.net/fr/collections/monnaies/france/"},
+
+  {id:9,title:"5 Francs Louis-Philippe 1834 A argent",cat:"franc",src:"lbc",prix:65,fraisPort:5.5,revente:80,frais:5,age:"il y a 1h 34",hot:true,
+   desc:"5F Louis-Philippe 1834 Paris. Argent 900‰. SUP.",poids:"25g",titre:"900‰",poidsG:25,metal:"argent",
+   valSpot:null,valNumis:95,
+   valExplication:"La 5F Louis-Philippe 1834 A (atelier Paris) en état SUP cote entre 80 et 120€ selon l'état précis et la rareté du millésime. Valeur métal seule ~23€ (25g × 900‰ × cours). Forte prime historique.",
+   auth:78, authRaison:"Pièce ancienne (1834) = risque de faux plus élevé. Description 'SUP' à confirmer en main. Vérifier les détails du coq, la tranche et le bord liseré. Acheteur averti recommandé.",
+   etat:"SUP",urlRef:"https://www.cgbfr.com/5-francs-louis-philippe-i",
+   url:"https://www.leboncoin.fr/recherche?text=5+francs+louis+philippe+argent",
+   urlRevente:"https://www.cgbfr.com/boutique/monnaies_francaises_royales/"},
+
+  // ── HERCULE ──
+  {id:3,title:"100F Hercule 1974 argent 900‰ — lot de 2",cat:"hercule",src:"lbc",prix:55,fraisPort:5,revente:78,frais:5,age:"il y a 19 min",hot:true,
+   desc:"100F Hercule argent 900‰. Lot de 2. État TTB+ à SUP.",poids:"2×15g",titre:"900‰",poidsG:30,metal:"argent",
+   valSpot:null,valNumis:78,
+   valExplication:"La 100F Hercule (15g d'argent 900‰) cote entre 30 et 45€ pièce en TTB+. Lot de 2 = 60 à 90€. Valeur métal seule : ~28€ (30g × 900‰ × cours argent). Belle prime numismatique, pièce très liquide.",
+   auth:95, authRaison:"Pièce 5ème République très connue, faux quasi-inexistants. Photos LBC nettes. Date 1974 = année commune. Excellent rapport confiance/prix.",
+   etat:"TTB+ à SUP",urlRef:"https://www.cgbfr.com/100-francs-hercule-1964-1980",
+   url:"https://www.leboncoin.fr/recherche?text=100+francs+hercule+argent",
+   urlRevente:"https://www.cgbfr.com/boutique/monnaies_francaises_5eme_republique/"},
+
+  {id:4,title:"10 Francs Hercule 1965 argent",cat:"hercule",src:"vint",prix:18,fraisPort:3.5,revente:20,frais:2,age:"il y a 25 min",hot:false,
+   desc:"10F Hercule argent 900‰. SUP.",poids:"10g",titre:"900‰",poidsG:10,metal:"argent",
+   valSpot:null,valNumis:22,
+   valExplication:"La 10F Hercule (10g à 900‰) cote 15 à 25€ en SUP selon le millésime. Valeur métal ~9€. Petit écart d'arbitrage ici mais pièce sûre et liquide.",
+   auth:90, authRaison:"Vinted = profil classique vendeur particulier. Pièce bien connue, photos standard. SUP à vérifier mais risque minimal.",
+   etat:"SUP",urlRef:"https://www.cgbfr.com/10-francs-hercule-1965-1973",
+   url:"https://www.vinted.fr/catalog?search_text=10+francs+hercule+argent",
+   urlRevente:"https://www.ebay.fr/sell"},
+
+  // ── LINGOTS ──
+  {id:5,title:"Lingot argent 100g Umicore + certificat",cat:"lingot",src:"lbc",prix:88,fraisPort:6,revente:90,frais:4,age:"il y a 38 min",hot:false,
+   desc:"Lingot 100g argent 999‰ Umicore avec certificat d'authenticité.",poids:"100g",titre:"999‰",poidsG:100,metal:"argent",
+   valSpot:null,valNumis:null,
+   valExplication:"Le lingot Umicore 100g vaut exactement son poids d'argent fin au cours spot : ~93€ actuellement. La décote vs spot neuf est normale (-7%). Avec certificat = premium de 2 à 5%. Prix très serré ici.",
+   auth:96, authRaison:"Umicore = marque de premier rang. Présence du certificat = fort signal d'authenticité. Lingots rarement contrefaits à ce poids. Seul vrai risque : numéro de série à vérifier.",
+   etat:"Neuf / Certificat",urlRef:"https://www.umicore.fr/fr/investissement/",
+   url:"https://www.leboncoin.fr/recherche?text=lingot+argent+100g+umicore",
+   urlRevente:"https://www.goldunion.fr/vendre-argent/"},
+
+  {id:10,title:"Barre argent 1kg Metalor scellée",cat:"lingot",src:"vint",prix:870,fraisPort:15,revente:910,frais:20,age:"il y a 2h 05",hot:false,
+   desc:"Barre 1kg argent 999‰ Metalor scellée d'origine.",poids:"1000g",titre:"999‰",poidsG:1000,metal:"argent",
+   valSpot:null,valNumis:null,
+   valExplication:"Barre 1kg Metalor = valeur spot pure. À 0,93€/g = ~930€. Prix demandé 885€ total = décote de ~5% vs spot. Normal pour occasion. Scellé d'origine = sécurité maximale.",
+   auth:94, authRaison:"Metalor = fondeur suisse de référence mondiale. Scellé d'usine = signal fort. Vinted = risque d'escroquerie plus élevé sur grosses valeurs, paiement sécurisé obligatoire.",
+   etat:"Scellé d'origine",urlRef:"https://www.metalor.com/fr/",
+   url:"https://www.vinted.fr/catalog?search_text=lingot+argent+1kg+metalor",
+   urlRevente:"https://www.goldunion.fr/vendre-argent/"},
+
+  // ── NAPOLÉONS OR ──
+  {id:11,title:"20 Francs Napoléon III 1866 or",cat:"napoleon",src:"lbc",prix:340,fraisPort:8,revente:390,frais:12,age:"il y a 2h 30",hot:true,
+   desc:"20F Napoléon III tête laurée 1866 BB. Or 900‰. SUP. Pièce très recherchée numismatiquement.",poids:"6.45g",titre:"900‰",poidsG:6.45,metal:"or",
+   valSpot:null,valNumis:420,
+   valExplication:"La 20F Napoléon III 1866 BB (atelier Strasbourg) vaut entre 380 et 480€ en SUP selon la rareté. Valeur métal or pur : 5,8g × 89€ = ~516€. Ici le prix est EN DESSOUS de la valeur métal ! Double opportunité.",
+   auth:82, authRaison:"Pièce ancienne = vigilance accrue. Vérifier le poids exact (6.45g), le diamètre (21mm), la tranche striée. Faux sur Napoléons sont connus. Photo LBC peu détaillée = demander des clichés supplémentaires avant achat.",
+   etat:"SUP",urlRef:"https://www.cgbfr.com/20-francs-napoleon-iii",
+   url:"https://www.leboncoin.fr/recherche?text=20+francs+napoleon+or+1866",
+   urlRevente:"https://www.goldunion.fr/vendre-or/"},
+
+  {id:12,title:"20 Francs Coq Marianne 1907 or",cat:"napoleon",src:"ebay",prix:310,fraisPort:7,revente:365,frais:10,age:"il y a 3h 15",hot:false,
+   desc:"20F Marianne Coq or 900‰. 1907 atelier Paris. TTB+.",poids:"6.45g",titre:"900‰",poidsG:6.45,metal:"or",
+   valSpot:null,valNumis:380,
+   valExplication:"La 20F Marianne Coq 1907 Paris en TTB+ vaut entre 340 et 420€. Valeur métal seule : ~516€ (5,8g or fin × ~89€/g). Prix annonce 317€ total = largement sous la valeur métal. Très intéressant.",
+   auth:88, authRaison:"Pièce eBay avec feedback visible. Coq Marianne = pièce très connue des collectionneurs, faux repérables. 1907 Paris = émission courante. TTB+ à confirmer sur photos.",
+   etat:"TTB+",urlRef:"https://www.cgbfr.com/20-francs-marianne-coq-1899-1906",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=20+francs+marianne+coq+or+1907",
+   urlRevente:"https://www.delcampe.net/fr/collections/monnaies/france/"},
+
+  // ── PIÈCES ÉTRANGÈRES ──
+  {id:8,title:"Dollar Morgan 1881 argent USA",cat:"piece",src:"ebay",prix:32,fraisPort:4,revente:40,frais:3,age:"il y a 1h 18",hot:false,
+   desc:"Morgan Dollar 1881 argent 900‰. État TTB. Très demandé collection USA.",poids:"26.7g",titre:"900‰",poidsG:26.7,metal:"argent",
+   valSpot:null,valNumis:45,
+   valExplication:"Le Morgan Dollar vaut sa valeur argent (~24€ métal) + prime collection. En TTB, cote entre 35 et 55€ selon atelier (S, O, CC = plus rares). Valeur réelle ici : ~45€. Marge correcte mais faible.",
+   auth:80, authRaison:"Morgan Dollar = pièce très contrefaite (Chine notamment). Vérifier au poids exact (26.73g), au bruit (sonnerie argent), et à l'absence de couture de frappe. Feedback vendeur eBay essentiel.",
+   etat:"TTB",urlRef:"https://www.pcgs.com/coinfacts/coin/morgan-dollar-1881",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=morgan+dollar+1881+argent",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=morgan+dollar+silver"},
+
+  {id:13,title:"Maria-Thérèse Thaler 1780 restrike argent",cat:"piece",src:"ebay",prix:22,fraisPort:3.5,revente:30,frais:2,age:"il y a 4h 20",hot:true,
+   desc:"Thaler Marie-Thérèse 1780 restrike officiel. Argent 833‰. 28.06g. Très demandé Moyen-Orient.",poids:"28g",titre:"833‰",poidsG:28,metal:"argent",
+   valSpot:null,valNumis:30,
+   valExplication:"Le Thaler MT est toujours daté 1780 (restrike officiel Vienne). Valeur métal ~24€ (23.4g argent fin). Valeur marché : 28 à 35€. Bonne marge ici à 25,5€ tout compris.",
+   auth:93, authRaison:"Restrike officiel de la Monnaie de Vienne = pièce standardisée. Quasi-impossible à contrefaire de façon rentable. Bonne confiance. Attention aux faux non officiels qui circulent sur eBay.",
+   etat:"FDC (restrike)",urlRef:"https://www.osterreichische-muenze.at/",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=maria+theresa+thaler+silver",
+   urlRevente:"https://www.ebay.fr/sell"},
+
+  // ── MONTRES MÉCANIQUES ──
+  {id:14,title:"Seiko 5 automatique SNK809 — boîte + papiers",cat:"montre",src:"lbc",prix:45,fraisPort:6,revente:95,frais:8,age:"il y a 32 min",hot:true,
+   desc:"Seiko 5 SNK809 automatique. Boîte d'origine + garantie. État quasi-neuf. Très recherché sur marché secondaire.",poids:"—",titre:"Automatique",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:95,
+   valExplication:"Le Seiko SNK809 se vend neuf 75€ en boutique mais d'occasion avec boîte/papiers en parfait état se négocie 90 à 110€ sur Chrono24 et eBay (forte demande internationale). Prix annonce 51€ tout compris = très intéressant.",
+   auth:88, authRaison:"Photos montrant boîte et papiers = fort signal de légitimité. Seiko SNK = montre entrée de gamme automatique, peu contrefaite. Vérifier le mouvement (trotteuse qui avance en continu = automatique OK).",
+   etat:"Quasi-neuf",urlRef:"https://www.chrono24.fr/seiko/seiko-5-snk809--id4082958.htm",
+   url:"https://www.leboncoin.fr/recherche?text=seiko+5+automatique+snk",
+   urlRevente:"https://www.chrono24.fr/seiko/index.htm"},
+
+  {id:15,title:"Omega Seamaster 1969 automatique cadran bleu",cat:"montre",src:"lbc",prix:280,fraisPort:8,revente:650,frais:30,age:"il y a 1h 45",hot:true,
+   desc:"Omega Seamaster vintage automatique cal.565. Cadran bleu original. Bracelet acier. Révisé 2022. Dossier complet.",poids:"—",titre:"Automatique cal.565",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:700,
+   valExplication:"L'Omega Seamaster vintage cal.565 avec cadran bleu original révisé se cote 600 à 900€ sur Chrono24 selon état. Avec dossier complet = prime. Prix demandé 288€ total = potentiel de ×2,3 net. Excellent.",
+   auth:75, authRaison:"Omega vintage = marché avec contrefaçons et cadrans remplacés. Vérifier : numéro de série (dos boîtier) datable sur myOmega.com, couleur cadran d'origine, état calibre 565. Achat en main ou escrow recommandé à ce prix.",
+   etat:"Bon état, révisé",urlRef:"https://www.chrono24.fr/omega/seamaster--id3182.htm",
+   url:"https://www.leboncoin.fr/recherche?text=omega+seamaster+vintage+automatique",
+   urlRevente:"https://www.chrono24.fr/omega/seamaster--id3182.htm"},
+
+  {id:16,title:"Longines Conquest 1962 acier automatique",cat:"montre",src:"vint",prix:120,fraisPort:7,revente:280,frais:20,age:"il y a 3h 10",hot:false,
+   desc:"Longines Conquest automatique 1962. Acier. Cadran champagne. Fonctionne parfaitement. Rare à ce prix.",poids:"—",titre:"Automatique",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:300,
+   valExplication:"Longines Conquest vintage des années 60 = très côtée. Entre 250 et 450€ sur Chrono24 selon état. Cadran champagne d'origine = premium. À 127€ total = potentiel de ×2,2 minimum.",
+   auth:70, authRaison:"Vinted = moins de garanties qu'un marchand. Photos à analyser: cadran original? index en bon état? Couronne Longines? Demander vidéo du mouvement. Longines vintage peu contrefaite mais restaurations cachées fréquentes.",
+   etat:"Bon état fonctionnel",urlRef:"https://www.chrono24.fr/longines/conquest--id3182.htm",
+   url:"https://www.vinted.fr/catalog?search_text=longines+conquest+automatique+vintage",
+   urlRevente:"https://www.chrono24.fr/longines/index.htm"},
+
+  // ── BILLETS ANCIENS ──
+  {id:17,title:"Billet 500 Francs Molière 1959 TTB+",cat:"billet",src:"ebay",prix:28,fraisPort:3,revente:85,frais:5,age:"il y a 55 min",hot:true,
+   desc:"Billet 500F Molière émission 1959. État TTB+. Très recherché. Cote catalogue 120€ en SUP.",poids:"—",titre:"Papier monnaie",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:85,
+   valExplication:"Le 500F Molière (F.38) est l'un des billets français les plus collectionnés. En TTB+ (très bel état, légère circulation), cote entre 70 et 110€ selon la lettre. En SUP = 120 à 200€. Prix annonce 31€ = très sous-côté.",
+   auth:85, authRaison:"eBay avec photos standard. Billets contrefaits existent mais repérables : vérifier filigrane (visible par transparence), fil de sécurité, impression taille-douce au toucher. Demander photo recto-verso haute résolution.",
+   etat:"TTB+",urlRef:"https://www.numismondo.fr/pm/fra/",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=billet+500+francs+moliere+1959",
+   urlRevente:"https://www.delcampe.net/fr/collections/billets/france/"},
+
+  {id:18,title:"Lot 8 billets Banque de France 1940–1960",cat:"billet",src:"lbc",prix:35,fraisPort:4,revente:120,frais:6,age:"il y a 2h 22",hot:true,
+   desc:"Lot 8 billets Banque de France divers. Période Vichy + 4ème République. État B à TTB. Belle opportunité de lot.",poids:"—",titre:"Papier monnaie",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:120,
+   valExplication:"Un lot Vichy/4ème République bien composé peut valoir 100 à 200€ selon les séries présentes. Un seul billet rare (Minerve, Victoire) dans le lot = jackpot possible. À 39€ total = excellent rapport risque/rendement.",
+   auth:80, authRaison:"Photos LBC peu détaillées — demander les références des billets (F.XX). Billets d'état B ont peu de valeur seuls, mais c'est le lot qui compte. Risque faible vu le prix demandé.",
+   etat:"B à TTB",urlRef:"https://www.numismondo.fr/pm/fra/",
+   url:"https://www.leboncoin.fr/recherche?text=lot+billets+anciens+france+1940",
+   urlRevente:"https://www.delcampe.net/fr/collections/billets/france/"},
+
+  // ── LEGO ──
+  {id:19,title:"LEGO Star Wars 75192 Millennium Falcon NEUF scellé",cat:"lego",src:"lbc",prix:450,fraisPort:18,revente:780,frais:35,age:"il y a 1h 28",hot:true,
+   desc:"LEGO 75192 Millennium Falcon UCS. Neuf, boîte scellée d'usine. Set retiré de la vente. Prix boutique 850€ à sa sortie.",poids:"—",titre:"Set scellé",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:780,
+   valExplication:"Le 75192 Millennium Falcon UCS retraité s'échange entre 700 et 950€ selon l'état de la boîte. BrickLink moyenne : ~780€. Prix tout compris 468€ = marge brute de +312€. Set très liquide.",
+   auth:90, authRaison:"Scellé d'usine = signal fort d'authenticité. Vérifier l'intégrité du shrink wrap et les stickers de sécurité Lego. Faux LEGO scellés existent mais rares. Peser la boîte si possible (8,47 kg pour ce set).",
+   etat:"NEUF scellé",urlRef:"https://www.bricklink.com/v2/catalog/catalogitem.page?S=75192-1",
+   url:"https://www.leboncoin.fr/recherche?text=lego+75192+millennium+falcon+neuf",
+   urlRevente:"https://www.bricklink.com/v2/catalog/catalogitem.page?S=75192-1"},
+
+  {id:20,title:"LEGO Harry Potter 71043 Poudlard NEUF",cat:"lego",src:"vint",prix:320,fraisPort:20,revente:520,frais:25,age:"il y a 3h 50",hot:false,
+   desc:"LEGO 71043 Château Poudlard. Neuf scellé. Set retiré. 6020 pièces. Cote en hausse constante depuis 2021.",poids:"—",titre:"Set scellé",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:520,
+   valExplication:"Le 71043 Poudlard a dépassé les 500€ d'occasion scellé sur BrickLink. Retraité depuis 2021 et cote toujours en hausse (+15%/an). À 340€ total = marge de ~180€ net.",
+   auth:88, authRaison:"Vinted avec photos du scellé. Vérifier le numéro de set visible à travers l'emballage et l'intégrité du cellophane. Set trop volumineux pour être facilement contrefait.",
+   etat:"NEUF scellé",urlRef:"https://www.bricklink.com/v2/catalog/catalogitem.page?S=71043-1",
+   url:"https://www.vinted.fr/catalog?search_text=lego+71043+poudlard+neuf",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=lego+71043+hogwarts+castle"},
+
+  // ── JEUX VIDÉO VINTAGE ──
+  {id:21,title:"Nintendo Game Boy DMG-01 original + 12 jeux",cat:"jeux",src:"lbc",prix:55,fraisPort:8,revente:180,frais:12,age:"il y a 8 min",hot:true,
+   desc:"Game Boy original DMG-01 gris. Fonctionne. Écran nickel. Lot 12 jeux dont Tetris, Pokémon Rouge, Zelda. Boîte d'origine GB.",poids:"—",titre:"Rétrogaming",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:180,
+   valExplication:"Un DMG-01 en état fonctionnel vaut 60 à 90€ seul. Pokémon Rouge avec boîte = 40 à 80€ seul. Tetris original 15€, Zelda 25€. Lot estimé 170 à 220€. À 63€ total = ×2,8 minimum.",
+   auth:92, authRaison:"Photos montrant l'écran allumé = signal fort. DMG-01 difficile à contrefaire. Jeux Pokémon Rouge à vérifier : cartouche authentique = pile interne qui tient la sauvegarde.",
+   etat:"Fonctionnel",urlRef:"https://www.pricecharting.com/game/game-boy/",
+   url:"https://www.leboncoin.fr/recherche?text=game+boy+original+dmg+jeux",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=game+boy+dmg+lot"},
+
+  {id:22,title:"Super Nintendo SNES + manettes + 8 jeux",cat:"jeux",src:"lbc",prix:80,fraisPort:10,revente:210,frais:15,age:"il y a 22 min",hot:true,
+   desc:"Console Super Nintendo PAL complète. 2 manettes d'origine. 8 jeux : Super Mario World, Street Fighter II, Donkey Kong Country, F-Zero…",poids:"—",titre:"Rétrogaming",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:210,
+   valExplication:"La SNES seule vaut 60 à 90€. Super Mario World boîte = 40€. Donkey Kong Country = 25€. Street Fighter II = 20€. Lot complet estimé 200 à 250€. À 90€ tout compris = potentiel ×2,3.",
+   auth:90, authRaison:"Console visible allumée sur photos = fonctionnel confirmé. Jeux PAL français = authentiques dans leur grande majorité. Tester Street Fighter II avant achat (cartouche souvent abîmée).",
+   etat:"Fonctionnel, complet",urlRef:"https://www.pricecharting.com/console/super-nintendo/",
+   url:"https://www.leboncoin.fr/recherche?text=super+nintendo+snes+lot+jeux",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=super+nintendo+snes+lot"},
+
+  {id:23,title:"Sega Mega Drive II + 20 jeux — dont Sonic 1",cat:"jeux",src:"ebay",prix:65,fraisPort:12,revente:160,frais:10,age:"il y a 41 min",hot:true,
+   desc:"Sega Mega Drive II PAL. 2 manettes. 20 jeux : Sonic 1, 2, 3, Streets of Rage, Golden Axe, Mortal Kombat II…",poids:"—",titre:"Rétrogaming",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:160,
+   valExplication:"Mega Drive II : 35 à 55€. Sonic 1 = 15€, Sonic 2 = 12€, Streets of Rage = 20€, Mortal Kombat II = 18€. Lot 20 jeux = 120 à 180€. Total estimé 160€. À 77€ = potentiel ×2.",
+   auth:88, authRaison:"Lot eBay avec photos multiples. Tester chaque cartouche avant validation. Sonic 1 original = connecteurs propres, pas de rouille. Mega Drive fonctionne 99% du temps.",
+   etat:"Fonctionnel",urlRef:"https://www.pricecharting.com/console/sega-genesis/",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=mega+drive+lot+jeux+sonic",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=mega+drive+ii+lot"},
+
+  {id:24,title:"Nintendo 64 + 15 jeux — Mario Kart 64 boîte",cat:"jeux",src:"lbc",prix:95,fraisPort:12,revente:280,frais:18,age:"il y a 1h 15",hot:true,
+   desc:"Nintendo 64 PAL grise. 2 manettes. 15 jeux dont Mario Kart 64 avec boîte, GoldenEye 007, Zelda Ocarina of Time, Super Mario 64.",poids:"—",titre:"Rétrogaming",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:280,
+   valExplication:"N64 seule 40€. Mario Kart 64 avec boîte = 45 à 70€. Zelda Ocarina = 30€. GoldenEye = 20€. Super Mario 64 = 25€. Lot 15 jeux = 220 à 300€. À 107€ = potentiel ×2,6.",
+   auth:91, authRaison:"Mario Kart 64 avec boîte d'origine est un fort signal de soin du vendeur. N64 très fiable. Zelda Ocarina à vérifier : copie = pile qui ne tient pas la sauvegarde.",
+   etat:"Fonctionnel, boîte MK64",urlRef:"https://www.pricecharting.com/console/nintendo-64/",
+   url:"https://www.leboncoin.fr/recherche?text=nintendo+64+lot+jeux+mario+kart",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=nintendo+64+lot+jeux"},
+
+  {id:25,title:"PlayStation 1 PSX Fat + 30 jeux — FF7 complet",cat:"jeux",src:"vint",prix:70,fraisPort:10,revente:190,frais:12,age:"il y a 2h 05",hot:true,
+   desc:"PlayStation 1 Fat SCPH-7502. 2 manettes. 30 jeux dont Final Fantasy VII complet 3 CD, Tekken 3, Crash Bandicoot 1-2-3.",poids:"—",titre:"Rétrogaming",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:190,
+   valExplication:"FF7 complet PAL = 30 à 60€ selon état. Crash Bandicoot 1 = 15€, Tekken 3 = 12€. Lot 30 jeux PS1 = 150 à 220€. Console 20€. À 80€ total = potentiel ×2,4.",
+   auth:87, authRaison:"FF7 complet = vérifier les 3 CDs, la notice et la boîte. PS1 Fat très fiable mais laser vieillissant (test lecture CD obligatoire). Copies PS1 rares et facilement détectables.",
+   etat:"Fonctionnel",urlRef:"https://www.pricecharting.com/console/playstation/",
+   url:"https://www.vinted.fr/catalog?search_text=playstation+1+psx+lot+jeux+ff7",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=playstation+1+lot+jeux"},
+
+  // ── CARTES POKÉMON ──
+  {id:26,title:"Lot 200 cartes Pokémon vintage Base Set + Jungle",cat:"pokemon",src:"lbc",prix:45,fraisPort:5,revente:180,frais:8,age:"il y a 14 min",hot:true,
+   desc:"200 cartes Pokémon séries Base Set, Jungle, Fossil. Dont Dracaufeu holographique, Ronflex, Tortank. Non triées. Français.",poids:"—",titre:"Collection",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:180,
+   valExplication:"Un Dracaufeu Base Set français en bon état = 80 à 300€ selon la grade. Ronflex holographique = 20 à 50€. Tortank holo = 30 à 80€. Lot non trié = jackpot potentiel. À 50€ = risque/rendement exceptionnel.",
+   auth:78, authRaison:"Lot non trié = surprise. Dracaufeu à vérifier : bords nets, dos sans rayures, texte centré. Cartes françaises Base Set = rares et plus chères qu'anglais. Demander photos des rares en gros plan.",
+   etat:"Variable",urlRef:"https://www.cardmarket.com/fr/Pokemon",
+   url:"https://www.leboncoin.fr/recherche?text=lot+cartes+pokemon+base+set+vintage",
+   urlRevente:"https://www.cardmarket.com/fr/Pokemon"},
+
+  {id:27,title:"Dracaufeu Holographique Base Set FR — bon état",cat:"pokemon",src:"ebay",prix:65,fraisPort:4,revente:200,frais:10,age:"il y a 38 min",hot:true,
+   desc:"Dracaufeu holographique Base Set français. Centrage correct, bords légèrement usés. Brillance holographique intacte. Rare.",poids:"—",titre:"Carte rare",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:200,
+   valExplication:"Le Dracaufeu Base Set français non gradé en bon état vaut 120 à 250€. Gradé PSA 8 = 400 à 800€. À 69€ total = marge minimum de +130€ en vente directe, ou ×5 si gradé.",
+   auth:72, authRaison:"Cartes Pokémon vintage très contrefaites. Vérifier l'hologramme (doit briller proprement, pas de sticker), la texture au toucher, le texte en français d'époque. Demander vidéo en lumière naturelle.",
+   etat:"Bon état",urlRef:"https://www.cardmarket.com/fr/Pokemon/Products/Singles/Base-Set/Dracaufeu",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=dracaufeu+holographique+base+set+francais",
+   urlRevente:"https://www.cardmarket.com/fr/Pokemon"},
+
+  // ── VINYLES & AUDIO VINTAGE ──
+  {id:28,title:"Lot 50 vinyles 33T Jazz/Soul 60s-70s — Miles Davis",cat:"vinyle",src:"lbc",prix:35,fraisPort:12,revente:180,frais:10,age:"il y a 29 min",hot:true,
+   desc:"50 vinyles 33T Jazz, Soul, Funk des années 60-70. Dont Miles Davis Kind of Blue, Marvin Gaye, James Brown, Herbie Hancock. État VG à NM.",poids:"—",titre:"Disques",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:180,
+   valExplication:"Miles Davis Kind of Blue original = 40 à 150€ selon pressage. Marvin Gaye original = 30 à 80€. James Brown = 20 à 60€. Lot de 50 Jazz/Soul = 150 à 400€ selon les pressages. À 47€ = potentiel ×4.",
+   auth:85, authRaison:"Jazz des 60-70 = marché très spécialisé. Vérifier les pressages (étiquette originale vs réédition). Miles Davis Kind of Blue : étiquette Two-Eye = original. Photos des étiquettes obligatoires.",
+   etat:"VG à NM",urlRef:"https://www.discogs.com/",
+   url:"https://www.leboncoin.fr/recherche?text=lot+vinyles+jazz+soul+miles+davis",
+   urlRevente:"https://www.discogs.com/sell/list"},
+
+  {id:29,title:"Platine vinyle Thorens TD-160 + cellule Shure",cat:"vinyle",src:"lbc",prix:120,fraisPort:15,revente:320,frais:20,age:"il y a 1h 22",hot:true,
+   desc:"Thorens TD-160 en état de marche. Cellule Shure M95ED montée. Sangle en bon état. Belle platine suisse des années 70.",poids:"—",titre:"Hifi vintage",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:350,
+   valExplication:"La Thorens TD-160 révisée avec cellule Shure = 300 à 450€ sur marché hifi vintage. Cellule Shure M95ED seule = 80 à 120€ d'occasion. À 135€ total = marge de +185€ minimum.",
+   auth:88, authRaison:"Thorens = marque suisse reconnue, très appréciée des audiophiles. Vérifier que la sangle tourne sans bruit, que l'aiguille est intacte. Demander vidéo avec un disque posé.",
+   etat:"Fonctionnel",urlRef:"https://www.discogs.com/fr/sell/list",
+   url:"https://www.leboncoin.fr/recherche?text=thorens+td+160+platine+vinyle",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=thorens+td160+platine"},
+
+  // ── SNEAKERS / STREETWEAR ──
+  {id:30,title:"Nike Air Jordan 1 Retro High OG Chicago 2015",cat:"sneakers",src:"vint",prix:280,fraisPort:10,revente:650,frais:30,age:"il y a 18 min",hot:true,
+   desc:"Air Jordan 1 Retro High OG Chicago 2015. Taille 42. Avec boîte d'origine. Portées ~3 fois. Condition Very Good.",poids:"—",titre:"Sneakers",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:680,
+   valExplication:"Les AJ1 Chicago 2015 s'échangent 600 à 850€ selon état et taille sur StockX. Taille 42 = taille neutre, très liquide. À 290€ total = potentiel de ×2,3 net.",
+   auth:74, authRaison:"Jordan 1 = les plus contrefaites au monde. Vérifier : broderie 'AIR JORDAN' sur languette, coutures intérieures régulières, semelle air visible, numéro de style sur étiquette intérieure. Boîte d'origine = bon signal mais pas suffisant.",
+   etat:"Very Good, boîte",urlRef:"https://stockx.com/air-jordan-1-retro-high-og-chicago-2015",
+   url:"https://www.vinted.fr/catalog?search_text=air+jordan+1+chicago+2015",
+   urlRevente:"https://stockx.com/sell"},
+
+  {id:31,title:"Nike Dunk Low Panda 2021 DS taille 44",cat:"sneakers",src:"lbc",prix:130,fraisPort:8,revente:280,frais:15,age:"il y a 55 min",hot:false,
+   desc:"Nike Dunk Low Panda 2021 deadstock non portées. Taille 44. Boîte + receipt original. Achat Footlocker.",poids:"—",titre:"Sneakers",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:280,
+   valExplication:"Les Dunk Low Panda DS se vendent 260 à 340€ selon taille. Taille 44 correcte. Deadstock = prime de 15 à 20%. À 138€ = marge nette de ~127€.",
+   auth:83, authRaison:"Receipt Footlocker = excellent signal d'authenticité. Dunk Low Panda très contrefaites : vérifier le swoosh (coutures au mauvais endroit sur faux), les perforations toe box, la taille des œillets.",
+   etat:"Deadstock / Neuf",urlRef:"https://stockx.com/nike-dunk-low-white-black-2021",
+   url:"https://www.leboncoin.fr/recherche?text=nike+dunk+low+panda+deadstock",
+   urlRevente:"https://stockx.com/sell"},
+
+  // ── OBJETS VINTAGE RECHERCHÉS ──
+  {id:32,title:"Appareil photo Leica M3 + objectif Summicron 50mm",cat:"vintage",src:"lbc",prix:450,fraisPort:15,revente:1100,frais:45,age:"il y a 35 min",hot:true,
+   desc:"Leica M3 Double Stroke 1954 fonctionnel. Objectif Summicron 50mm f/2 fixé. Rideau obturateur intact. Belle patine.",poids:"—",titre:"Photo argentique",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:1200,
+   valExplication:"Leica M3 DS fonctionnel = 600 à 900€ seul. Summicron 50mm f/2 vintage = 400 à 700€ seul. Ensemble estimé 1000 à 1600€. À 465€ tout compris = potentiel de ×2,3 minimum.",
+   auth:80, authRaison:"Leica = marque très copiée. Vérifier numéro de série sur la base (doit correspondre à 1954 sur des registres en ligne). Obturateur doit fonctionner à toutes les vitesses. Rideau sans trous (lampe de poche derrière).",
+   etat:"Fonctionnel",urlRef:"https://www.leica-camera.com/fr-FR",
+   url:"https://www.leboncoin.fr/recherche?text=leica+m3+summicron+50mm",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=leica+m3+summicron"},
+
+  {id:33,title:"Rolleiflex 2.8F Planar — argentique 6x6",cat:"vintage",src:"ebay",prix:380,fraisPort:18,revente:900,frais:40,age:"il y a 1h 48",hot:true,
+   desc:"Rolleiflex 2.8F Planar Zeiss. Miroir propre, soufflet étanche. Objectif sans moisissures. Fonctionne à toutes les vitesses.",poids:"—",titre:"Photo argentique",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:950,
+   valExplication:"Le Rolleiflex 2.8F Planar en bon état vaut 800 à 1400€. Très demandé des photographes argentiques et créateurs de contenu. À 398€ = potentiel de ×2,4.",
+   auth:82, authRaison:"Rolleiflex = marque de prestige, peu de faux. Vérifier : soufflet sans lumière parasite (test en chambre noire), miroir sans taches, obturateur à toutes vitesses, objectif sans moisissures en lumière rasante.",
+   etat:"Fonctionnel complet",urlRef:"https://www.ebay.fr/sch/i.html?_nkw=rolleiflex+2.8f+planar",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=rolleiflex+2.8f+planar",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=rolleiflex+2.8f"},
+
+  {id:34,title:"Lampe Gras n°205 originale 1930s — atelier",cat:"vintage",src:"lbc",prix:85,fraisPort:14,revente:320,frais:18,age:"il y a 2h 12",hot:true,
+   desc:"Lampe Gras modèle 205 originale années 30. Fonte et acier. Socle lourd. Câblage refait. Fonctionne. Très recherchée décoration.",poids:"—",titre:"Design industriel",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:350,
+   valExplication:"Une Lampe Gras originale des années 30 vaut 300 à 600€ chez les antiquaires et sur Pamono. Les reproductions nouvelles coûtent 400€. Original à 99€ = affaire rare. Très demandé designers et architectes.",
+   auth:76, authRaison:"Attention aux copies nombreuses. Original = fonte lourde et rugueuse, rivet visible, bras articulé résistant. Marque 'GRAS' gravée dans le métal (pas une étiquette). Câblage ancien remplacé = normal.",
+   etat:"Fonctionnel, câblage neuf",urlRef:"https://www.pamono.fr/lampes-gras",
+   url:"https://www.leboncoin.fr/recherche?text=lampe+gras+originale+vintage+industrielle",
+   urlRevente:"https://www.pamono.fr/sell"},
+
+  {id:35,title:"Juke-box Wurlitzer 1015 1946 — fonctionnel",cat:"vintage",src:"lbc",prix:1800,fraisPort:120,revente:4500,frais:200,age:"il y a 3h 20",hot:true,
+   desc:"Wurlitzer 1015 One More Time 1946. Mécanique révisée, lecteur fonctionne. 24 sélections. Bulle en plastique originale intacte.",poids:"—",titre:"Jukebox",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:5000,
+   valExplication:"Le Wurlitzer 1015 est l'un des jukeboxes les plus iconiques et recherchés. Fonctionnel et original : 4000 à 8000€ chez les spécialistes. À 1920€ total = potentiel ×2,3 minimum.",
+   auth:85, authRaison:"Grosse pièce difficile à contrefaire. Vérifier que la mécanique de sélection fonctionne sur plusieurs titres, que les disques lisent correctement. Bulle plastique intacte = prime importante. Transport délicat.",
+   etat:"Fonctionnel, révisé",urlRef:"https://www.wurlitzer-jukebox.com/",
+   url:"https://www.leboncoin.fr/recherche?text=jukebox+wurlitzer+vintage+fonctionnel",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=wurlitzer+1015+jukebox"},
+
+  {id:36,title:"Montre Lip Himalaya 1957 acier automatique",cat:"vintage",src:"vint",prix:95,fraisPort:7,revente:350,frais:22,age:"il y a 4h 05",hot:false,
+   desc:"Lip Himalaya 1957 automatique acier. Cadran crème original. Fond verre. Porte-montre cuir d'époque. Fonctionne.",poids:"—",titre:"Montre vintage FR",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:380,
+   valExplication:"La Lip Himalaya est une icône française de l'horlogerie. En état original fonctionnel : 300 à 500€. Cadran crème non repeint = premium majeur. À 102€ = potentiel ×3,4.",
+   auth:82, authRaison:"Lip vintage = marque française, peu contrefaite. Vérifier cadran original (pas de repeint : chercher écaillures normales, index légèrement patinés). Fond verre permet de voir le mouvement Lip.",
+   etat:"Fonctionnel",urlRef:"https://www.chrono24.fr/lip/index.htm",
+   url:"https://www.vinted.fr/catalog?search_text=lip+himalaya+automatique+vintage",
+   urlRevente:"https://www.chrono24.fr/lip/index.htm"},
+
+  // ── BANDES DESSINÉES ──
+  {id:37,title:"Tintin au Tibet EO 1960 Casterman — bon état",cat:"bd",src:"lbc",prix:28,fraisPort:5,revente:120,frais:8,age:"il y a 46 min",hot:true,
+   desc:"Tintin au Tibet édition originale 1960 Casterman. Couverture cartonnée. Dos légèrement passé. Pages intactes. Très bon état.",poids:"—",titre:"BD ancienne",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:130,
+   valExplication:"Tintin au Tibet EO 1960 en bon état vaut 100 à 200€ chez les spécialistes BD. Casterman EO = tirage limité. À 33€ total = marge de +90€ minimum. Demande croissante.",
+   auth:85, authRaison:"Vérifier le dépôt légal (1960 sur la page intérieure), le dos éditeur Casterman d'époque, et l'absence de restauration (pages blanchies artificiellement). Tirage EO identifiable par le prix en couv.",
+   etat:"Bon état",urlRef:"https://www.bdnet.com/bd/tintin/",
+   url:"https://www.leboncoin.fr/recherche?text=tintin+tibet+edition+originale+casterman",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=tintin+tibet+edition+originale"},
+
+  {id:38,title:"Astérix le Gaulois EO 1961 + lot 8 EO Goscinny",cat:"bd",src:"ebay",prix:180,fraisPort:8,revente:580,frais:25,age:"il y a 2h 33",hot:true,
+   desc:"Astérix le Gaulois EO 1961 (Dargaud) + lot 8 premières éditions Goscinny/Uderzo 1961-1972. Ensemble bien conservé.",poids:"—",titre:"BD ancienne",poidsG:0,metal:"autre",
+   valSpot:null,valNumis:620,
+   valExplication:"Astérix le Gaulois EO 1961 seul = 200 à 500€ selon état. Chaque EO Goscinny 1961-72 = 30 à 150€. Lot de 9 EO = 400 à 700€. À 188€ tout compris = potentiel ×3.",
+   auth:80, authRaison:"EO Astérix 1961 = identifier le dépôt légal 1961 et l'éditeur Dargaud (pas Hachette). Dos toilé = bon signe. Restaurations fréquentes sur ces pièces — inspecter les pages de garde sous UV si possible.",
+   etat:"Bien conservé",urlRef:"https://www.bdnet.com/bd/asterix/",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=asterix+gaulois+edition+originale+1961",
+   urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=asterix+edition+originale+goscinny"},
+];
+
+const CATS = [
+  {id:"all",    name:"Tout voir",           icon:"🔍", desc:"Toutes annonces confondues",                    badge:null,           badgeType:null},
+  // ── MÉTAUX ──
+  {id:"semeuse",name:"Semeuses argent",     icon:"⚜️", desc:"50c, 1F, 2F, 5F Semeuse 835‰",                 badge:"ROI moy. 40%",  badgeType:"fire"},
+  {id:"hercule",name:"Hercule argent",      icon:"💪", desc:"10F et 100F Hercule 900‰",                     badge:"ROI moy. 35%",  badgeType:"fire"},
+  {id:"franc",  name:"Francs argent",       icon:"🪙", desc:"5F, 10F, 20F, 50F français anciens",           badge:"ROI moy. 28%",  badgeType:"fire"},
+  {id:"napoleon",name:"Napoléons or",       icon:"👑", desc:"20F or Napoléon I, III, Marianne Coq",          badge:"ROI moy. 18%",  badgeType:"smart"},
+  {id:"lingot", name:"Lingots & barres",    icon:"🔩", desc:"100g à 5kg certifiés Umicore/Metalor",          badge:"Sécurisé",      badgeType:"hot"},
+  {id:"piece",  name:"Pièces étrangères",   icon:"🌍", desc:"Morgan $, Crown, Thaler argent…",               badge:"Niche",         badgeType:"niche"},
+  // ── MONTRES & BILLETS ──
+  {id:"montre", name:"Montres vintage",     icon:"⌚", desc:"Seiko, Omega, Longines, Lip mécaniques",        badge:"ROI moy. 80%",  badgeType:"fire"},
+  {id:"billet", name:"Billets anciens",     icon:"💶", desc:"Billets Banque de France avant 1960",           badge:"ROI moy. 120%", badgeType:"fire"},
+  // ── JEUX & CULTURE ──
+  {id:"jeux",   name:"Jeux vidéo vintage",  icon:"🎮", desc:"SNES, N64, Mega Drive, PS1, Game Boy + jeux",   badge:"ROI moy. 150%", badgeType:"fire"},
+  {id:"pokemon",name:"Cartes Pokémon",      icon:"⚡", desc:"Base Set, Jungle, Fossil — 1ères éditions FR",  badge:"ROI moy. 200%", badgeType:"fire"},
+  {id:"bd",     name:"BD anciennes",        icon:"📖", desc:"EO Tintin, Astérix, Spirou, Lucky Luke",        badge:"ROI moy. 180%", badgeType:"fire"},
+  {id:"lego",   name:"LEGO scellés",        icon:"🧱", desc:"Sets Star Wars, HP, Technic retraités",         badge:"ROI moy. 50%",  badgeType:"hot"},
+  // ── OBJETS VINTAGE ──
+  {id:"vintage",name:"Objets vintage",      icon:"🏺", desc:"Leica, Rolleiflex, Lampes Gras, Design 50-70s", badge:"ROI moy. 120%", badgeType:"fire"},
+  {id:"vinyle", name:"Vinyles & Hifi",      icon:"🎵", desc:"Disques rares, platines Thorens, amplis tubes",  badge:"ROI moy. 90%",  badgeType:"fire"},
+  {id:"sneakers",name:"Sneakers",           icon:"👟", desc:"Jordan, Dunk, Yeezy, Travis Scott…",            badge:"ROI moy. 80%",  badgeType:"hot"},
+];
+
+const ALERTS_HIST = [
+  {msg:"5F Semeuse ×3 — ROI 36% — LBC",time:"il y a 4 min",roi:"fire"},
+  {msg:"100F Hercule lot — ROI 42% — LBC",time:"il y a 19 min",roi:"fire"},
+  {msg:"Lot 10 Semeuses 2F — ROI 43% — LBC",time:"il y a 1h 02",roi:"fire"},
+  {msg:"20F Napoléon III 1866 — ROI 17% — LBC",time:"il y a 2h 30",roi:"ok"},
+  {msg:"Dollar Morgan 1881 — ROI 15% — eBay",time:"il y a 3h 10",roi:"ok"},
+];
+
+const SUGGESTIONS = [
+  {cls:"sg-metaux",icon:"🪙",name:"Pièces argent (fondation)",roi:"ROI moyen : +25% à +60%",badge:"FIRE",badgeType:"badge-fire",
+   desc:"Les francs argent achetés à particuliers sont la niche la plus sûre. La méconnaissance du cours de l'argent crée des écarts constants. 0 risque de faux sur les pièces 5ème République.",
+   tips:["Chercher 'lot monnaies anciennes' sans mentionner 'argent' pour trouver les vendeurs naïfs","5F Semeuse, 10F/100F Hercule = trio gagnant avec liquidité maximale","Vérifier à l'aimant : l'argent n'attire pas l'aimant","Revente sur Delcampe, CGB, ou fondre chez un racheteur d'argent"]},
+  {cls:"sg-jeux",icon:"🎮",name:"Jeux vidéo vintage — ×2 à ×5",roi:"ROI moyen : +80% à +400%",badge:"FIRE",badgeType:"badge-fire",
+   desc:"Le rétrogaming explose. Des familles bradent leurs vieux jeux sans en connaître la valeur. Un lot Game Boy + Pokémon Rouge acheté 60€ peut se revendre 180€. Marché liquide, demande mondiale.",
+   tips:["Chercher 'lot jeux anciens' 'vieux jeux' 'console des années 90'","Pokémon Rouge/Bleu, Zelda Ocarina, Mario Kart 64 = cartes maîtresses","Tester AVANT achat : tout doit fonctionner sinon négocier -50%","Revente eBay international (acheteurs US/JP paient 30% de plus)"]},
+  {cls:"sg-pokemon",icon:"⚡",name:"Cartes Pokémon 1ère édition — jackpot",roi:"ROI moyen : +100% à +2000%",badge:"FIRE",badgeType:"badge-fire",
+   desc:"Les cartes Base Set françaises 1999-2000 atteignent des prix records. Un Dracaufeu holographique gradé PSA 10 = 10 000€+. Même non gradé en bon état : 200 à 500€. Les familles ne savent pas ce qu'elles ont.",
+   tips:["Acheter des collections entières sans triage pour trouver les pépites","Dracaufeu, Ronflex, Tortank, Florizarre = les 4 starters holographiques","Faire grader par PSA ou Beckett les cartes en parfait état = ×5 valeur","Chercher 'lot cartes pokemon anciens' 'collection pokemon enfant'"]},
+  {cls:"sg-vintage",icon:"🏺",name:"Objets vintage design — ×3 à ×10",roi:"ROI moyen : +120% à +500%",badge:"FIRE",badgeType:"badge-fire",
+   desc:"Les lampes Gras, appareils Leica, platines Thorens, mobilier Knoll ou Eames sont bradés par ignorance. Un particulier qui 'vide la maison de mamie' ne sait pas qu'une lampe Gras originale vaut 400€.",
+   tips:["Cibler les successions, ventes de maison, encombrants sur LBC","Leica, Rolleiflex, Hasselblad = argentique haut de gamme très coté","Lampes industrielles Gras, Jieldé, Jielde = très demandées décoration","Revente sur Pamono, 1stDibs, Selency, brocantes pro"]},
+  {cls:"sg-bd",icon:"📖",name:"BD premières éditions — ×3 à ×20",roi:"ROI moyen : +180% à +1000%",badge:"FIRE",badgeType:"badge-fire",
+   desc:"Les premières éditions de Tintin, Astérix, Spirou, Lucky Luke valent une fortune. Une EO Tintin au Tibet 1960 achetée 30€ chez un particulier se revend 150€. Marché méconnu du grand public.",
+   tips:["Identifier les EO : dépôt légal de l'année de parution sur la page intérieure","Tintin : EO Casterman = dos coloré, prix en couverture, tirage numéroté","Astérix EO 1961 Dargaud = reliure toilée, page de garde cream","Revente : eBay, Delcampe, Drouot, foires BD, librairies spécialisées"]},
+  {cls:"sg-vinyle",icon:"🎵",name:"Vinyles rares & Hifi vintage — ×4",roi:"ROI moyen : +90% à +300%",badge:"HOT",badgeType:"badge-hot",
+   desc:"Les vinyles Jazz, Soul, Prog-Rock des années 60-70 explosent. Un pressage original Miles Davis ou Coltrane = 50 à 200€. Les platines Thorens et Garrard se revendent 3× leur prix d'achat particulier.",
+   tips:["Discogs.com = bible des prix par pressage (vérifier étiquette exacte)","Jazz Blue Note, Impulse!, Prestige = labels les plus côtés","Platines Thorens TD-124, 150, 160 / Garrard 301 = valeurs sûres","Chercher 'collection disques vinyles jazz soul' + années dans l'annonce"]},
+  {cls:"sg-montres",icon:"⌚",name:"Montres mécaniques vintage — ×2 à ×5",roi:"ROI moyen : +80% à +300%",badge:"HOT",badgeType:"badge-hot",
+   desc:"Seiko, Longines, Omega, Lip des années 60-80 se bradent sur LBC. Un Seiko Pogue (chronographe automatique) acheté 90€ se revend 350€. Les Omega vintage triplent en valeur après révision.",
+   tips:["Seiko Pogue 6139, Seiko Leopard, Citizen Bullhead = bombes à retardement","Omega Constellation, Seamaster Diver vintage = ×3 garantis","Faire réviser = +50% de valeur (prévoir 80-120€ chez un bon horloger)","Revente Chrono24 (international), WatchUSeek, eBay international"]},
+  {cls:"sg-sneakers",icon:"👟",name:"Sneakers rares — ×2 à ×4",roi:"ROI moyen : +80% à +200%",badge:"HOT",badgeType:"badge-hot",
+   desc:"Les Air Jordan 1, Nike Dunk, Yeezy se revendent 2× leur prix retail dès le lendemain du drop. Sur LBC, des particuliers les vendent sans connaître StockX. Le marché est mondial et ultra-liquide.",
+   tips:["Vérifier l'authenticité sur CheckCheck ou Legit Check app AVANT achat","Jordan 1 Retro OG, Dunk Low, Yeezy 350 = les plus liquides","Taille 42-44 = neutre, se vend le plus vite","Revente StockX, Vinted Pro, GOAT, ou groupes FB sneakers France"]},
+  {cls:"sg-billets",icon:"💶",name:"Billets anciens — ×3 à ×8",roi:"ROI moyen : +120% à +400%",badge:"FIRE",badgeType:"badge-fire",
+   desc:"Les billets Banque de France 1900-1960 sont massivement sous-cotés par les particuliers. Un 500F Molière TTB+ acheté 28€ se revend 85€. Le marché numismatique papier est méconnu mais solide.",
+   tips:["500F Molière, 1000F Minerve et Hercule, 100F Napoléon = séries jackpots","État TTB = bien, SUP = parfait, UNC = jackpot","Vérifier filigrane par transparence + toucher taille-douce","Revente Delcampe, CGBI, Numismundo, foires numismatiques"]},
+  {cls:"sg-lego",icon:"🧱",name:"LEGO scellés — valeur sûre",roi:"ROI moyen : +50% à +80%",badge:"HOT",badgeType:"badge-hot",
+   desc:"Les sets LEGO retraités s'apprécient de 15%/an en moyenne. Star Wars UCS, Harry Potter, Architecture = les plus stables. Achetés neufs aujourd'hui = profit assuré dans 2-3 ans.",
+   tips:["Acheter uniquement scellé d'usine, conserver 2-3 ans minimum","75192 Falcon, 71043 Poudlard, 10294 Titanic = meilleurs performers","Minifigurines rares des séries Collectable = 5-50€ l'unité","Revente BrickLink, eBay, groupes FB LEGO Investment France"]},
+];
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function getValSpot(a){
+  if(!a.poidsG) return 0;
+  const spot = a.metal==='or' ? GOLD_G : (a.metal==='argent' ? SILVER_G : 0);
+  const titre = parseFloat((a.titre||'').replace('‰',''))/1000 || 1;
+  return +(a.poidsG * spot * titre).toFixed(2);
+}
+function getValReelle(a){
+  // Valeur réelle = numismatique si dispo, sinon spot
+  if(a.valNumis) return a.valNumis;
+  return getValSpot(a);
+}
+function roi(a){ return Math.round((a.revente-a.frais-(a.prix+a.fraisPort))/(a.prix+a.fraisPort)*100); }
+function profit(a){ return +((a.revente-a.frais-(a.prix+a.fraisPort))).toFixed(2); }
+function totalAchat(a){ return +(a.prix+a.fraisPort).toFixed(2); }
+
+function authColor(score){
+  if(score>=90) return 'var(--green)';
+  if(score>=75) return 'var(--amber)';
+  return 'var(--red)';
+}
+function authLabel(score){
+  if(score>=90) return '✓ Authentique';
+  if(score>=75) return '⚠ Vérifier';
+  return '✗ Risqué';
+}
+function authBg(score){
+  if(score>=90) return 'var(--green-bg)';
+  if(score>=75) return 'var(--amber-bg)';
+  return 'var(--red-bg)';
+}
+
+function srcPill(s){
+  const m={lbc:{c:"s-lbc",l:"LBC"},vint:{c:"s-vint",l:"Vinted"},ebay:{c:"s-ebay",l:"eBay"},cdp:{c:"s-cdp",l:"Delcampe"}}[s]||{c:"",l:s};
+  return `<span class="src-pill ${m.c}">${m.l}</span>`;
+}
+function roiCls(r){ return r>=30?"roi-fire":r>=15?"roi-ok":"roi-low"; }
+function fmt(n){ return n.toFixed(2).replace('.',','); }
+
+function calcPort(p){
+  const cout = +(p.prixAchat + p.portAchat).toFixed(2);
+  const metalSpot = p.metal==='or' ? GOLD_G : SILVER_G;
+  const valMetal = +(p.poidsG * metalSpot).toFixed(2);
+  const valMarche = +(valMetal + (p.numis||0)).toFixed(2);
+  const prixConseille = +(Math.max(valMarche * 0.95, cout * 1.30)).toFixed(2);
+  const pvNet = +(prixConseille - cout).toFixed(2);
+  const roiP = cout > 0 ? Math.round(pvNet/cout*100) : 0;
+  const plancher = +(cout * 1.05).toFixed(2);
+  return {cout, valMetal, valMarche, prixConseille, pvNet, roiP, plancher};
+}
+
+// ══════════════════════════════════════════
+// ARTICLE CARD
+// ══════════════════════════════════════════
+function buildCard(a){
+  const r=roi(a), p=profit(a), ta=totalAchat(a);
+  const vspot=getValSpot(a), vreelle=getValReelle(a);
+  const fill=Math.min(100,Math.round(Math.max(0,p)/ta*200));
+  const icons={semeuse:"⚜️",franc:"🪙",hercule:"💪",lingot:"🔩",napoleon:"👑",piece:"🌍",montre:"⌚",billet:"💶",lego:"🧱",jeux:"🎮",pokemon:"⚡",bd:"📖",vintage:"🏺",vinyle:"🎵",sneakers:"👟"};
+  const ico=icons[a.cat]||"🪙";
+  return `<div class="a-card${a.hot?" hot":""}" onclick="openModal(${a.id})">
+    <div class="a-top">
+      <div class="a-title">${ico} ${a.title}</div>
+      ${srcPill(a.src)}
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;background:${authBg(a.auth)};border-radius:6px;padding:6px 10px;">
+      <div style="font-size:11px;font-weight:700;color:${authColor(a.auth)};font-family:'DM Mono',monospace;white-space:nowrap;">${authLabel(a.auth)} ${a.auth}%</div>
+      <div style="flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${a.auth}%;background:${authColor(a.auth)};border-radius:2px;"></div></div>
+      <div style="font-size:10px;color:var(--text3);white-space:nowrap;">${a.etat}</div>
+    </div>
+    <div class="a-prices">
+      <div class="p-cell">
+        <div class="p-lbl">Prix annonce</div>
+        <div class="p-val col-red">${fmt(a.prix)}€</div>
+        <div class="p-sub">+${fmt(a.fraisPort)}€ port</div>
+      </div>
+      <div class="p-cell" style="border:1px solid var(--gold-bdr);background:rgba(201,168,76,.05);">
+        <div class="p-lbl" style="color:var(--gold);">Valeur réelle</div>
+        <div class="p-val col-gold">${fmt(vreelle)}€</div>
+        <div class="p-sub">${vspot>0?"métal ~"+fmt(vspot)+"€":"cote marché"}</div>
+      </div>
+      <div class="p-cell">
+        <div class="p-lbl">Revente est.</div>
+        <div class="p-val col-green">${fmt(a.revente)}€</div>
+        <div class="p-sub">marché actuel</div>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${fill}%"></div></div>
+    <div class="a-bot">
+      <span class="a-time">${a.age}</span>
+      <span class="roi-pill ${roiCls(r)}">+${fmt(p)}€ · ROI ${r}%</span>
+    </div>
+    <div class="a-shipping">Coût total (annonce+port) : <strong>${fmt(ta)}€</strong> · Valeur réelle : <strong style="color:var(--gold2)">${fmt(vreelle)}€</strong></div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// RENDERS
+// ══════════════════════════════════════════
+function renderFlux(filter){
+  const list=ARTICLES.filter(a=>filter==='all'||a.cat===filter);
+  document.getElementById('flux-list').innerHTML=list.length
+    ?list.map(buildCard).join('')
+    :'<div class="empty">Aucune annonce pour ce filtre.</div>';
+}
+
+function renderTop(){
+  const sorted=[...ARTICLES].sort((a,b)=>roi(b)-roi(a));
+  const ranks=['rank-1','rank-2','rank-3'];
+  document.getElementById('top-slides').innerHTML=sorted.slice(0,6).map((a,i)=>`
+    <div class="podium-card ${ranks[i]||''}" onclick="openModal(${a.id})">
+      <div class="podium-rank">#${i+1} meilleure affaire</div>
+      <div class="podium-roi ${i===0?'col-gold':'col-green'}">ROI ${roi(a)}%</div>
+      <div class="podium-title">${a.title}</div>
+      <div class="podium-profit col-green">+${fmt(profit(a))}€ net</div>
+      <div class="podium-meta">${srcPill(a.src)}<span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;">${a.age}</span></div>
+    </div>`).join('');
+  document.getElementById('top-list').innerHTML=sorted.map(buildCard).join('');
+}
+
+let activeCat=null;
+function renderCats(filter){
+  activeCat=filter;
+  document.getElementById('cat-grid').innerHTML=CATS.map(c=>`
+    <div class="cat-card${activeCat===c.id?' selected':''}" onclick="filterCatFn('${c.id}')">
+      ${c.badge?`<div class="cat-profit-badge ${c.badgeType==='fire'?'badge-fire':c.badgeType==='hot'?'badge-hot':c.badgeType==='smart'?'badge-smart':'badge-niche'}">${c.badge}</div>`:''}
+      <div class="cat-icon-wrap">${c.icon}</div>
+      <div class="cat-name">${c.name}</div>
+      <div class="cat-desc">${c.desc}</div>
+      <div class="cat-stats"><span class="cat-stat"><span class="val">${ARTICLES.filter(a=>c.id==='all'||a.cat===c.id).length}</span> <span class="lbl">annonces</span></span></div>
+    </div>`).join('');
+  const list=filter&&filter!=='all'?ARTICLES.filter(a=>a.cat===filter):ARTICLES;
+  document.getElementById('cat-list').innerHTML=list.map(buildCard).join('');
+  const found=CATS.find(c=>c.id===filter);
+  document.getElementById('cat-lbl').textContent=found&&filter!=='all'?`Annonces — ${found.name}`:'Toutes les annonces';
+}
+window.filterCatFn=function(id){ renderCats(id); };
+
+function renderSuggestions(){
+  document.getElementById('suggest-grid').innerHTML=SUGGESTIONS.map(s=>`
+    <div class="suggest-card ${s.cls}">
+      <div class="suggest-badge ${s.badgeType}">${s.badge}</div>
+      <div class="suggest-icon">${s.icon}</div>
+      <div class="suggest-name">${s.name}</div>
+      <div class="suggest-roi">${s.roi}</div>
+      <div class="suggest-desc">${s.desc}</div>
+      <ul class="suggest-tips">${s.tips.map(t=>`<li>${t}</li>`).join('')}</ul>
+    </div>`).join('');
+}
+
+function renderAlerts(){
+  document.getElementById('hist-list').innerHTML=ALERTS_HIST.map(a=>`
+    <div class="hist-item">
+      <div><div class="hist-msg">🔔 ${a.msg}</div><div class="hist-time">${a.time}</div></div>
+      <span class="roi-pill ${a.roi==='fire'?'roi-fire':a.roi==='ok'?'roi-ok':'roi-low'}">${a.roi==='fire'?'Chaud ✦':'OK'}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// PORTEFEUILLE
+// ══════════════════════════════════════════
+let portfolio=[
+  {id:101,nom:"5F Semeuse 1960 ×3",type:"semeuse",metal:"argent",titre:"835‰",prixAchat:28,portAchat:4.5,poidsG:36,numis:0,status:"en-vente",source:"Leboncoin",date:"2025-03-20"},
+  {id:102,nom:"100F Hercule 1972",type:"hercule",metal:"argent",titre:"900‰",prixAchat:42,portAchat:5,poidsG:15,numis:5,status:"stock",source:"Leboncoin",date:"2025-03-28"},
+];
+let nextId=200;
+
+function renderPortfolio(){
+  const smMap={stock:{cls:'st-stock',l:'En stock'},'en-vente':{cls:'st-vente',l:'En vente'},vendu:{cls:'st-vendu',l:'Vendu'}};
+  const el=document.getElementById('port-list');
+  if(!portfolio.length){ el.innerHTML='<div class="empty">Aucun achat. Ajoutez votre premier achat avec le formulaire ci-dessus.</div>'; updateKPIs(); return; }
+  el.innerHTML=portfolio.map(p=>{
+    const c=calcPort(p), sm=smMap[p.status]||smMap.stock;
+    const pvCls=c.pvNet>=0?'col-green':'col-red', pvSign=c.pvNet>=0?'+':'';
+    return `<div class="port-card${p.status==='vendu'?' vendu':''}">
+      <div class="port-head">
+        <div class="port-name">${p.metal==='or'?'👑':'🪙'} ${p.nom}</div>
+        <span class="status-dot ${sm.cls}">${sm.l}</span>
+      </div>
+      <div class="port-nums">
+        <div class="pn-cell"><div class="pn-lbl">Coût total<br>(achat+port)</div><div class="pn-val col-red">${fmt(c.cout)}€</div></div>
+        <div class="pn-cell"><div class="pn-lbl">Val. métal spot</div><div class="pn-val ${p.metal==='or'?'col-gold':'col-silver'}">${fmt(c.valMetal)}€</div></div>
+        <div class="pn-cell"><div class="pn-lbl">Val. marché</div><div class="pn-val col-blue">${fmt(c.valMarche)}€</div></div>
+        <div class="pn-cell"><div class="pn-lbl">Plus-value</div><div class="pn-val ${pvCls}">${pvSign}${fmt(c.pvNet)}€</div></div>
+      </div>
+      <div class="conseil">
+        <div class="conseil-hd">✦ Conseil de vente au cours du jour</div>
+        <div class="conseil-prix-row">
+          <div class="conseil-prix">${fmt(c.prixConseille)} €</div>
+          <div class="conseil-roi">${pvSign}${c.roiP}% ROI</div>
+        </div>
+        <div class="conseil-detail">Prix conseillé intègre le cours spot ${p.metal} (${p.metal==='or'?fmt(GOLD_G):fmt(SILVER_G)} €/g) + marge de sécurité 30%.</div>
+        <div class="conseil-plancher">⚠ Seuil plancher : ${fmt(c.plancher)} € — ne vends pas en dessous</div>
+      </div>
+      <div class="port-footer">
+        <span class="port-meta">${p.poidsG}g · ${p.titre} · ${p.source} · ${p.date||'—'}</span>
+        <div class="port-btns">
+          <button class="p-btn" onclick="cycleStatus(${p.id})">${p.status==='stock'?'Mettre en vente':p.status==='en-vente'?'Marquer vendu':'Remettre en stock'}</button>
+          <button class="p-btn del" onclick="removePort(${p.id})">Suppr.</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateKPIs();
+}
+
+function updateKPIs(){
+  const act=portfolio.filter(p=>p.status!=='vendu');
+  const inv=portfolio.reduce((s,p)=>s+p.prixAchat+p.portAchat,0);
+  const marc=portfolio.reduce((s,p)=>s+calcPort(p).valMarche,0);
+  const pv=+(marc-inv).toFixed(2);
+  const roiGlobal=inv>0?Math.round(pv/inv*100):0;
+  document.getElementById('k-investi').textContent=fmt(inv)+'€';
+  document.getElementById('k-marche').textContent=fmt(marc)+'€';
+  const pvEl=document.getElementById('k-pv');
+  pvEl.textContent=(pv>=0?'+':'')+fmt(pv)+'€';
+  pvEl.className='kpi-val '+(pv>=0?'col-green':'col-red');
+  document.getElementById('k-pv-sub').textContent='vs. investi (achat+port)';
+  document.getElementById('k-count').textContent=act.length;
+  document.getElementById('k-roi').textContent=(roiGlobal>=0?'+':'')+roiGlobal+'%';
+}
+
+window.cycleStatus=function(id){
+  const p=portfolio.find(x=>x.id===id);if(!p)return;
+  const cy={stock:'en-vente','en-vente':'vendu',vendu:'stock'};
+  p.status=cy[p.status]||'stock';renderPortfolio();
+};
+window.removePort=function(id){portfolio=portfolio.filter(x=>x.id!==id);renderPortfolio();};
+
+// Calc preview en temps réel
+window.updateCalc=function(){
+  const prix=parseFloat(document.getElementById('f-prix').value)||0;
+  const port=parseFloat(document.getElementById('f-port').value)||0;
+  const poids=parseFloat(document.getElementById('f-poids').value)||0;
+  const numis=parseFloat(document.getElementById('f-numis').value)||0;
+  const metal=document.getElementById('f-metal').value;
+  if(!prix&&!poids){
+    ['c-cout','c-vspot','c-vmarche','c-vconseil','c-vpv','c-vroi'].forEach(id=>document.getElementById(id).textContent='—');
+    return;
+  }
+  const cout=prix+port;
+  const metalSpot=metal==='or'?GOLD_G:SILVER_G;
+  const vspot=+(poids*metalSpot).toFixed(2);
+  const vmarche=+(vspot+numis).toFixed(2);
+  const vconseil=+(Math.max(vmarche*0.95,cout*1.30)).toFixed(2);
+  const vpv=+(vconseil-cout).toFixed(2);
+  const vroi=cout>0?Math.round(vpv/cout*100):0;
+  document.getElementById('c-cout').textContent=fmt(cout)+'€';
+  document.getElementById('c-vspot').textContent=fmt(vspot)+'€';
+  document.getElementById('c-vmarche').textContent=fmt(vmarche)+'€';
+  document.getElementById('c-vconseil').textContent=fmt(vconseil)+'€';
+  document.getElementById('c-vpv').textContent=(vpv>=0?'+':'')+fmt(vpv)+'€';
+  document.getElementById('c-vroi').textContent=(vroi>=0?'+':'')+vroi+'%';
+  document.getElementById('c-vpv').className='calc-val '+(vpv>=0?'col-green':'col-red');
+  document.getElementById('c-vroi').className='calc-val '+(vroi>=0?'col-green':'col-red');
+};
+
+window.addAchat=function(){
+  const nom=document.getElementById('f-nom').value.trim();
+  const prixAchat=parseFloat(document.getElementById('f-prix').value)||0;
+  if(!nom||!prixAchat){alert('Renseigne au minimum le nom et le prix d\'achat.');return;}
+  portfolio.unshift({
+    id:nextId++,nom,
+    type:document.getElementById('f-type').value,
+    metal:document.getElementById('f-metal').value,
+    titre:document.getElementById('f-titre').value.trim()||'—',
+    prixAchat,
+    portAchat:parseFloat(document.getElementById('f-port').value)||0,
+    poidsG:parseFloat(document.getElementById('f-poids').value)||0,
+    numis:parseFloat(document.getElementById('f-numis').value)||0,
+    status:'stock',
+    source:document.getElementById('f-source').value,
+    date:document.getElementById('f-date').value||new Date().toISOString().split('T')[0],
+  });
+  ['f-nom','f-titre','f-prix','f-port','f-poids','f-numis'].forEach(id=>document.getElementById(id).value='');
+  updateCalc();
+  renderPortfolio();
+  navigate('port');
+};
+
+// ══════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════
+const SRC_LABELS = {lbc:'Leboncoin',vint:'Vinted',ebay:'eBay',cdp:'Delcampe'};
+const SRC_COLORS = {lbc:'var(--amber)',vint:'var(--blue)',ebay:'var(--red)',cdp:'var(--purple)'};
+const CAT_LABELS  = {semeuse:'Semeuse argent',franc:'Franc argent',hercule:'Hercule argent',lingot:'Lingot/Barre',napoleon:'Napoléon or',piece:'Pièce étrangère',montre:'Montre vintage',billet:'Billet ancien',lego:'LEGO scellé',jeux:'Jeu vidéo vintage',pokemon:'Carte Pokémon',bd:'Bande dessinée',vintage:'Objet vintage',vinyle:'Vinyle / Hifi',sneakers:'Sneakers'};
+
+window.openModal=function(id){
+  const a=ARTICLES.find(x=>x.id===id);if(!a)return;
+  const r=roi(a), p=profit(a), ta=totalAchat(a);
+  const isMetal = ['semeuse','franc','hercule','lingot','napoleon','piece'].includes(a.cat);
+  const spotLine = isMetal
+    ? `<tr><td>Cours spot</td><td style="color:${a.cat==='napoleon'?'var(--gold2)':'var(--silver2)'};">${a.cat==='napoleon'?fmt(GOLD_G)+' €/g (or)':fmt(SILVER_G)+' €/g (argent)'}</td></tr>`
+    : '';
+  const catLabel = CAT_LABELS[a.cat]||a.cat;
+  const pvColor = p>=0?'var(--green)':'var(--red)';
+  const pvSign  = p>=0?'+':'';
+  const pvBg    = p>=0?'var(--green-bg)':'var(--red-bg)';
+  const pvBdr   = p>=0?'var(--green-bdr)':'rgba(248,113,113,.2)';
+
+  document.getElementById('m-title').textContent = a.title;
+
+  // Corps scrollable
+  const vspot=getValSpot(a), vreelle=getValReelle(a);
+  document.getElementById('m-body').innerHTML=`
+    <div class="m-prices">
+      <div class="m-cell"><div class="m-lbl">Prix annonce</div><div class="m-val col-red">${fmt(a.prix)}€</div></div>
+      <div class="m-cell"><div class="m-lbl">+ Port</div><div class="m-val" style="color:var(--text2)">${fmt(a.fraisPort)}€</div></div>
+      <div class="m-cell"><div class="m-lbl">Coût total</div><div class="m-val col-silver">${fmt(ta)}€</div></div>
+      <div class="m-cell" style="border:1px solid var(--gold-bdr);background:rgba(201,168,76,.06);"><div class="m-lbl" style="color:var(--gold);">Valeur réelle</div><div class="m-val col-gold">${fmt(vreelle)}€</div></div>
+    </div>
+
+    <div style="background:${authBg(a.auth)};border-radius:8px;padding:12px 14px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:700;color:${authColor(a.auth)};">${authLabel(a.auth)} — ${a.auth}%</span>
+        <div style="flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${a.auth}%;background:${authColor(a.auth)};border-radius:2px;"></div></div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;">${a.authRaison}</div>
+    </div>
+
+    <div style="background:rgba(201,168,76,.06);border:1px solid var(--gold-bdr);border-radius:8px;padding:12px 14px;margin-bottom:12px;">
+      <div style="font-size:10px;color:var(--gold);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">✦ Pourquoi cette valeur ?</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6;">${a.valExplication}</div>
+      ${vspot>0?`<div style="margin-top:8px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">Métal spot : ${fmt(vspot)}€ · Numismatique : ${a.valNumis?fmt(a.valNumis)+"€":"—"}</div>`:""}
+    </div>
+
+    <div class="m-profit" style="background:${pvBg};border-color:${pvBdr};">
+      <div><div style="font-size:12px;color:${pvColor};">Profit net estimé</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Après port + frais de vente</div></div>
+      <div class="m-profit-val" style="color:${pvColor};">${pvSign}${fmt(p)}€ · ${r}%</div>
+    </div>
+    <table class="m-table">
+      <tr><td>Catégorie</td><td>${catLabel}</td></tr>
+      <tr><td>État</td><td>${a.etat}</td></tr>
+      <tr><td>Description</td><td>${a.desc}</td></tr>
+      ${a.poids!=='—'?`<tr><td>Poids</td><td>${a.poids}</td></tr>`:''}
+      ${a.titre!=='—'?`<tr><td>Finesse</td><td>${a.titre}</td></tr>`:''}
+      <tr><td>Source</td><td style="color:${SRC_COLORS[a.src]||'var(--text)'};">${SRC_LABELS[a.src]||a.src.toUpperCase()}</td></tr>
+      <tr><td>Publiée</td><td>${a.age}</td></tr>
+      ${spotLine}
+      ${a.urlRef?`<tr><td>Cote référence</td><td><a href="${a.urlRef}" target="_blank" style="color:var(--gold2);">Voir la cote ↗</a></td></tr>`:''}
+    </table>`;
+
+  // Boutons sticky toujours visibles en bas
+  document.getElementById('m-actions').innerHTML=`
+    <a href="${a.url}" target="_blank" rel="noopener" class="modal-link-btn">
+      🔗 Voir l'annonce sur ${SRC_LABELS[a.src]||a.src} ↗
+    </a>
+    <a href="${a.urlRevente}" target="_blank" rel="noopener" class="modal-link-btn secondary">
+      💰 Où revendre ce produit ↗
+    </a>
+    <button class="modal-close-btn" onclick="closeModal()">Fermer</button>`;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('m-body').scrollTop = 0;
+};
+window.closeModal=function(){ document.getElementById('overlay').classList.remove('open'); };
+document.getElementById('overlay').onclick=function(e){if(e.target===this)closeModal();};
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+const PAGE_INFO={
+  flux:{title:'Flux récent',crumb:'annonces par ordre d\'arrivée'},
+  top:{title:'Top affaires',crumb:'triées par ROI décroissant'},
+  cats:{title:'Catégories',crumb:'filtrer par type de pièce'},
+  port:{title:'Portefeuille',crumb:'suivi de vos achats'},
+  suggest:{title:'Suggestions IA',crumb:'niches d\'achat-revente rentables'},
+  alertes:{title:'Alertes & Paramètres',crumb:'configuration des seuils'},
+};
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
+  const info=PAGE_INFO[page]||{};
+  const ttEl=document.getElementById('tb-title');
+  const crEl=document.getElementById('tb-crumb');
+  if(ttEl)ttEl.textContent=info.title||'';
+  if(crEl)crEl.textContent=info.crumb||'';
+}
+document.querySelectorAll('[data-page]').forEach(el=>{
+  el.addEventListener('click',()=>navigate(el.dataset.page));
+});
+
+// ══════════════════════════════════════════
+// FLUX FILTERS
+// ══════════════════════════════════════════
+document.querySelectorAll('#flux-chips .chip').forEach(chip=>{
+  chip.onclick=function(){
+    document.querySelectorAll('#flux-chips .chip').forEach(c=>c.classList.remove('active'));
+    this.classList.add('active');
+    renderFlux(this.dataset.filter);
+  };
+});
+
+// ══════════════════════════════════════════
+// SLIDERS
+// ══════════════════════════════════════════
+document.getElementById('s-roi').oninput=function(){document.getElementById('s-roi-v').textContent=this.value+'%';};
+document.getElementById('s-profit').oninput=function(){document.getElementById('s-profit-v').textContent=this.value+'€';};
+document.getElementById('s-freq').oninput=function(){document.getElementById('s-freq-v').textContent=this.value+' min';};
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+renderFlux('all');
+renderTop();
+renderCats(null);
+renderSuggestions();
+renderPortfolio();
+renderAlerts();
+updateCalc();
+
+// Date par défaut aujourd'hui
+document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+
+// Wire add button safely after DOM ready
+const addBtnEl = document.getElementById('add-btn');
+if(addBtnEl) addBtnEl.onclick = window.addAchat;
+
+
+// ══════════════════════════════════════════
+// LIVE SYSTEM — ordre correct : data → logic → start
+// ══════════════════════════════════════════
+
+// ─── 1. SON ───────────────────────────────
+let soundEnabled = true;
+function toggleSound(){
+  soundEnabled = !soundEnabled;
+  const on = soundEnabled;
+  const btn  = document.getElementById('sound-btn');
+  const btnM = document.getElementById('sound-btn-mob');
+  if(btn){  btn.textContent  = on ? '🔔 Son ON' : '🔕 Son OFF'; btn.style.color = on ? 'var(--green)' : 'var(--text3)'; btn.style.borderColor = on ? 'var(--green-bdr)' : 'var(--border2)'; }
+  if(btnM){ btnM.textContent = on ? '🔔' : '🔕';                btnM.style.color= on ? 'var(--green)' : 'var(--text3)'; }
+}
+function playPop(urgent){
+  if(!soundEnabled) return;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    if(urgent){
+      [880,1100].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.frequency.value=f;
+        g.gain.setValueAtTime(.12,ctx.currentTime+i*.13);
+        g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.13+.22);
+        o.start(ctx.currentTime+i*.13);o.stop(ctx.currentTime+i*.13+.25);
+      });
+    } else {
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.setValueAtTime(660,ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(880,ctx.currentTime+.09);
+      g.gain.setValueAtTime(.1,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.22);
+      o.start();o.stop(ctx.currentTime+.25);
+    }
+  }catch(e){}
+}
+
+// ─── 2. STYLES CSS ────────────────────────
+(function(){
+  const s=document.createElement('style');
+  s.textContent=`
+  #toast-container{position:fixed;top:70px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:340px;width:calc(100vw - 32px);pointer-events:none;}
+  .vf-toast{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--green);border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;pointer-events:all;cursor:pointer;animation:toastIn .35s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 8px 32px rgba(0,0,0,.55);}
+  .vf-toast.urgent{border-left-color:var(--gold);}
+  .vf-toast.fading{animation:toastOut .3s ease forwards;}
+  @keyframes toastIn{from{opacity:0;transform:translateX(110%)}to{opacity:1;transform:translateX(0)}}
+  @keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(110%)}}
+  .ti{font-size:22px;flex-shrink:0;}
+  .tb{flex:1;min-width:0;}
+  .tl{font-size:9px;color:var(--green);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;}
+  .tl.u{color:var(--gold);}
+  .tt{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tm{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;display:flex;gap:8px;flex-wrap:wrap;}
+  .tr{color:var(--green);font-weight:600;}
+  .tr.u{color:var(--gold);}
+  .tc{font-size:13px;color:var(--text3);cursor:pointer;flex-shrink:0;padding:2px;}
+  .tp{height:2px;background:var(--bg4);border-radius:1px;margin-top:6px;overflow:hidden;}
+  .tpf{height:100%;background:var(--green);border-radius:1px;transition:width linear;}
+  .tpf.u{background:var(--gold);}
+  #scan-pulse{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--green-bdr);border-radius:20px;padding:5px 14px;font-size:11px;font-family:'DM Mono',monospace;color:var(--green);display:flex;align-items:center;gap:6px;z-index:8888;opacity:0;pointer-events:none;transition:opacity .3s;}
+  #scan-pulse.show{opacity:1;}
+  @media(min-width:960px){#scan-pulse{bottom:16px;}#toast-container{top:65px;}}
+  .a-card.nc{border-color:var(--green)!important;animation:ncpop .5s cubic-bezier(.34,1.56,.64,1) both;}
+  @keyframes ncpop{from{opacity:0;transform:scale(.93) translateY(-6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  .nbadge{position:absolute;top:-1px;right:12px;background:var(--green);color:#000;font-size:9px;font-weight:800;letter-spacing:.08em;padding:2px 8px;border-radius:0 0 6px 6px;font-family:'DM Mono',monospace;animation:bp 1s ease 3;}
+  @keyframes bp{0%,100%{opacity:1}50%{opacity:.4}}
+  .nbanim{animation:nbb .4s cubic-bezier(.34,1.56,.64,1);}
+  @keyframes nbb{0%{transform:scale(1)}50%{transform:scale(1.6)}100%{transform:scale(1)}}
+
+  /* ── CHART MODAL ── */
+  #cm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:5000;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+  #cm-overlay.open{display:flex;}
+  @media(min-width:600px){#cm-overlay{align-items:center;padding:16px;}}
+  #cm-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:88vh;overflow-y:auto;padding:20px;animation:slideUp .25s ease;}
+  @media(min-width:600px){#cm-box{border-radius:20px;}}
+  @keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .cm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .cm-head h3{font-size:15px;font-weight:600;flex:1;padding-right:8px;line-height:1.3;}
+  .cm-x{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:none;cursor:pointer;color:var(--text2);font-size:14px;}
+  .cm-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .cm-tab{padding:5px 14px;border-radius:20px;font-size:12px;border:1px solid var(--border2);cursor:pointer;color:var(--text2);background:var(--bg3);transition:all .15s;}
+  .cm-tab.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:600;}
+  .cm-wrap{position:relative;height:200px;width:100%;}
+  .cm-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:14px;}
+  .cm-stat{background:var(--bg3);border-radius:10px;padding:10px 12px;}
+  .cm-sl{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+  .cm-sv{font-size:17px;font-family:'DM Mono',monospace;font-weight:600;}
+  .cm-src{font-size:10px;color:var(--text3);margin-top:10px;font-family:'DM Mono',monospace;line-height:1.5;}
+  .chart-btn{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+  .chart-btn button{background:none;border:1px solid var(--border2);border-radius:20px;padding:4px 12px;color:var(--text3);font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;}
+  .chart-btn button:hover{border-color:var(--gold);color:var(--gold);}
+  `;
+  document.head.appendChild(s);
+})();
+
+// ─── 3. TOAST CONTAINER + SCAN PULSE ──────
+const _tc = document.createElement('div'); _tc.id='toast-container'; document.body.appendChild(_tc);
+const _sp = document.createElement('div'); _sp.id='scan-pulse';
+_sp.innerHTML='<span style="width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;display:inline-block;"></span> Scan en cours…';
+document.body.appendChild(_sp);
+
+function showScanPulse(){
+  _sp.classList.add('show');
+  setTimeout(()=>_sp.classList.remove('show'),2200);
+  const bar=document.querySelector('.topbar')||document.querySelector('.mobile-topbar');
+  if(bar){ bar.style.position='relative'; const l=document.createElement('div'); l.style.cssText='position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scanSlide 1.5s ease-in-out;pointer-events:none;'; bar.appendChild(l); setTimeout(()=>l.remove(),1600); }
+}
+
+// ─── 4. CHART SYSTEM ──────────────────────
+const _cmOverlay=document.createElement('div'); _cmOverlay.id='cm-overlay';
+_cmOverlay.innerHTML=`<div id="cm-box">
+  <div class="cm-head"><h3 id="cm-title">Évolution du prix</h3><button class="cm-x" onclick="closeChart()">✕</button></div>
+  <div class="cm-tabs" id="cm-tabs"></div>
+  <div class="cm-wrap"><canvas id="cm-canvas"></canvas></div>
+  <div class="cm-stats" id="cm-stats"></div>
+  <div class="cm-src" id="cm-src"></div>
+</div>`;
+_cmOverlay.onclick=e=>{ if(e.target===_cmOverlay) closeChart(); };
+document.body.appendChild(_cmOverlay);
+window.closeChart=()=>_cmOverlay.classList.remove('open');
+
+let _chartInst=null, _chartCat=null, _chartPeriod='1m';
+const CHART_CFG={
+  semeuse:{title:"5F Semeuse argent — Cote marché",src:"CGB.fr · Delcampe · Numismondo · Kitco (cours Ag spot)",color:"#d0dde8",unit:"€",
+    p:{'7j':{b:13,v:.012,t:.002,n:7},'1m':{b:12.5,v:.015,t:.003,n:30},'6m':{b:11,v:.02,t:.005,n:6},'1an':{b:9.5,v:.025,t:.01,n:12}},
+    stats:[['Cote TTB','13€'],['Cote SUP','18€'],['Métal seul',()=>fmt(+(35*SILVER_G*.835).toFixed(2))+'€']]},
+  hercule:{title:"100F Hercule argent — Cote marché",src:"CGB.fr · Delcampe · Numismondo · Kitco",color:"#d0dde8",unit:"€",
+    p:{'7j':{b:38,v:.012,t:.002,n:7},'1m':{b:36,v:.015,t:.003,n:30},'6m':{b:32,v:.02,t:.005,n:6},'1an':{b:28,v:.025,t:.01,n:12}},
+    stats:[['Cote TTB','38€'],['Cote SUP','48€'],['Métal seul',()=>fmt(+(15*SILVER_G*.9).toFixed(2))+'€']]},
+  franc:{title:"Francs argent — Cote marché",src:"CGB.fr · Delcampe · Numismondo",color:"#d0dde8",unit:"€",
+    p:{'7j':{b:22,v:.012,t:.002,n:7},'1m':{b:21,v:.015,t:.003,n:30},'6m':{b:18,v:.02,t:.005,n:6},'1an':{b:15,v:.025,t:.01,n:12}},
+    stats:[['5F Semeuse','13€'],['5F Louis-Philippe','90€'],['20F Marianne','14€']]},
+  napoleon:{title:"20F Napoléon or — Cote",src:"CGB.fr · GoldUnion · Kitco (cours Au spot)",color:"#e8c97a",unit:"€",
+    p:{'7j':{b:445,v:.01,t:.001,n:7},'1m':{b:435,v:.012,t:.002,n:30},'6m':{b:400,v:.018,t:.005,n:6},'1an':{b:350,v:.022,t:.009,n:12}},
+    stats:[['Valeur or',()=>fmt(+(6.45*GOLD_G*.9).toFixed(2))+'€'],['Cote collect.','450€'],['Variation 1an','+27%']]},
+  lingot:{title:"Argent spot — Cours €/g",src:"Kitco.com · GoldPrice.org · GoldUnion.fr (temps réel simulé)",color:"#d0dde8",unit:"€/g",
+    p:{'7j':{b:.91,v:.008,t:.001,n:7},'1m':{b:.89,v:.012,t:.002,n:30},'6m':{b:.82,v:.018,t:.005,n:6},'1an':{b:.74,v:.022,t:.009,n:12}},
+    stats:[['Argent actuel',()=>fmt(SILVER_G)+'€/g'],['Or actuel',()=>fmt(GOLD_G)+'€/g'],['Ratio or/ag',()=>Math.round(GOLD_G/SILVER_G)+'×']]},
+  piece:{title:"Pièces argent étrangères — Cote",src:"PcGS.com · eBay sold · Delcampe",color:"#d0dde8",unit:"€",
+    p:{'7j':{b:42,v:.015,t:.002,n:7},'1m':{b:40,v:.02,t:.003,n:30},'6m':{b:35,v:.025,t:.007,n:6},'1an':{b:28,v:.03,t:.012,n:12}},
+    stats:[['Morgan Dollar','45€'],['Maria-Thérèse','30€'],['Crown argent','35€']]},
+  jeux:{title:"Rétrogaming — Prix marché",src:"PriceCharting.com · eBay sold listings · Vinted trending",color:"#52d68a",unit:"€",
+    p:{'7j':{b:165,v:.015,t:.003,n:7},'1m':{b:155,v:.02,t:.005,n:30},'6m':{b:128,v:.03,t:.01,n:6},'1an':{b:95,v:.04,t:.02,n:12}},
+    stats:[['Game Boy lot','180€'],['N64 lot complet','280€'],['SNES lot','210€']]},
+  pokemon:{title:"Cartes Pokémon FR — Cote",src:"Cardmarket.com · PSA Registry · eBay sold FR",color:"#fbbf24",unit:"€",
+    p:{'7j':{b:192,v:.025,t:.005,n:7},'1m':{b:172,v:.035,t:.009,n:30},'6m':{b:118,v:.05,t:.022,n:6},'1an':{b:75,v:.06,t:.042,n:12}},
+    stats:[['Dracaufeu NM','200€'],['PSA 9','650€'],['PSA 10','3 500€+']]},
+  bd:{title:"BD premières éditions — Cote",src:"BDnet.com · Drouot · eBay sold · Delcampe",color:"#c084fc",unit:"€",
+    p:{'7j':{b:120,v:.01,t:.001,n:7},'1m':{b:116,v:.015,t:.002,n:30},'6m':{b:100,v:.02,t:.007,n:6},'1an':{b:78,v:.025,t:.014,n:12}},
+    stats:[['Tintin EO moy.','130€'],['Astérix EO','350€'],['Lucky Luke EO','55€']]},
+  vintage:{title:"Objets vintage design — Cote",src:"Pamono.fr · 1stDibs · Selency · eBay sold",color:"#fb923c",unit:"€",
+    p:{'7j':{b:325,v:.01,t:.002,n:7},'1m':{b:312,v:.015,t:.003,n:30},'6m':{b:268,v:.025,t:.009,n:6},'1an':{b:215,v:.03,t:.016,n:12}},
+    stats:[['Lampe Gras orig.','350€'],['Leica M3','800€'],['Rolleiflex 2.8F','950€']]},
+  vinyle:{title:"Vinyles rares — Prix Discogs",src:"Discogs.com market data · eBay sold · VinylHub",color:"#67b2f8",unit:"€",
+    p:{'7j':{b:90,v:.015,t:.003,n:7},'1m':{b:83,v:.02,t:.005,n:30},'6m':{b:64,v:.03,t:.012,n:6},'1an':{b:48,v:.04,t:.02,n:12}},
+    stats:[['Jazz vintage moy.','60€'],['Miles Davis KOB','180€'],['Tendance','+25%/an']]},
+  sneakers:{title:"Sneakers — Prix StockX",src:"StockX.com · GOAT · Vinted Pro sales data",color:"#f87171",unit:"€",
+    p:{'7j':{b:645,v:.02,t:.003,n:7},'1m':{b:612,v:.03,t:.007,n:30},'6m':{b:518,v:.04,t:.016,n:6},'1an':{b:375,v:.05,t:.03,n:12}},
+    stats:[['Jordan 1 Chicago','650€'],['Dunk Low Panda','280€'],['Tendance','+45%/an']]},
+  billet:{title:"Billets anciens — Cote numismatique",src:"CGBI.fr · Numismondo.fr · Delcampe · Foires numismatiques",color:"#52d68a",unit:"€",
+    p:{'7j':{b:83,v:.008,t:.001,n:7},'1m':{b:80,v:.012,t:.002,n:30},'6m':{b:70,v:.018,t:.006,n:6},'1an':{b:57,v:.022,t:.012,n:12}},
+    stats:[['500F Molière TTB','85€'],['500F Molière SUP','150€'],['1000F Minerve','75€']]},
+  montre:{title:"Montres vintage — Cote Chrono24",src:"Chrono24.fr · WatchUSeek · eBay sold",color:"#67b2f8",unit:"€",
+    p:{'7j':{b:420,v:.012,t:.002,n:7},'1m':{b:400,v:.018,t:.004,n:30},'6m':{b:338,v:.025,t:.01,n:6},'1an':{b:258,v:.03,t:.02,n:12}},
+    stats:[['Seiko Pogue','350€'],['Omega Seamaster','680€'],['Longines Conquest','300€']]},
+};
+
+function _genPrices(b,v,t,n){
+  const out=[]; let p=b*(1-t*n/2);
+  for(let i=0;i<n;i++){ p*=(1+t+(Math.random()-.5)*v); p=Math.max(p,b*.3); out.push(+p.toFixed(2)); }
+  return out;
+}
+function _getLabels(period,n){
+  const now=new Date(),labels=[];
+  if(period==='7j'){ for(let i=n-1;i>=0;i--){ const d=new Date(now);d.setDate(d.getDate()-i);labels.push(d.toLocaleDateString('fr-FR',{weekday:'short'})); } }
+  else if(period==='1m'){ for(let i=n-1;i>=0;i--){ const d=new Date(now);d.setDate(d.getDate()-i);labels.push((i%5===0||i===0)?d.getDate()+'/'+(d.getMonth()+1):''); } }
+  else if(period==='6m'){ for(let i=n-1;i>=0;i--){ const d=new Date(now);d.setMonth(d.getMonth()-i);labels.push(d.toLocaleDateString('fr-FR',{month:'short'})); } }
+  else{ for(let i=n-1;i>=0;i--){ const d=new Date(now);d.setMonth(d.getMonth()-i);labels.push(d.toLocaleDateString('fr-FR',{month:'short',year:'2-digit'})); } }
+  return labels;
+}
+
+function _drawChart(cat,period){
+  const cfg=CHART_CFG[cat]; if(!cfg) return;
+  const pc=cfg.p[period]; if(!pc) return;
+  const data=_genPrices(pc.b,pc.v,pc.t,pc.n);
+  const labels=_getLabels(period,pc.n);
+  const last=data[data.length-1],first=data[0];
+  const chg=((last-first)/first*100).toFixed(1);
+
+  // stats
+  document.getElementById('cm-stats').innerHTML=cfg.stats.map(([l,v])=>`
+    <div class="cm-stat">
+      <div class="cm-sl">${l}</div>
+      <div class="cm-sv" style="color:${cfg.color}">${typeof v==='function'?v():v}</div>
+    </div>`).join('')+`
+    <div class="cm-stat">
+      <div class="cm-sl">Variation ${period}</div>
+      <div class="cm-sv" style="color:${parseFloat(chg)>=0?'var(--green)':'var(--red)'}">${parseFloat(chg)>=0?'+':''}${chg}%</div>
+    </div>`;
+
+  if(_chartInst){ _chartInst.destroy(); _chartInst=null; }
+
+  function draw(){
+    const canvas=document.getElementById('cm-canvas'); if(!canvas) return;
+    _chartInst=new Chart(canvas,{
+      type:'line',
+      data:{labels,datasets:[{data,borderColor:cfg.color,backgroundColor:cfg.color+'15',borderWidth:2,tension:.4,fill:true,pointRadius:pc.n<=7?4:0,pointHoverRadius:6,pointBackgroundColor:cfg.color}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#18181c',titleColor:'#f4f2ee',bodyColor:'#8a8880',borderColor:'rgba(255,255,255,.11)',borderWidth:1,callbacks:{label:c=>' '+c.parsed.y.toFixed(2)+' '+cfg.unit}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4a4845',font:{size:10},maxRotation:0}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4a4845',font:{size:10},callback:v=>v.toFixed(v<10?.2:v<100?1:0)+cfg.unit}}}}
+    });
+  }
+  if(window.Chart) draw();
+  else{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'; s.onload=draw; document.head.appendChild(s); }
+}
+
+window.openChart=function(cat){
+  const cfg=CHART_CFG[cat]; if(!cfg) return;
+  _chartCat=cat; _chartPeriod='1m';
+  document.getElementById('cm-title').textContent=cfg.title;
+  document.getElementById('cm-src').textContent='📊 Sources : '+cfg.src;
+  _renderChartTabs();
+  _drawChart(cat,'1m');
+  _cmOverlay.classList.add('open');
+};
+function _renderChartTabs(){
+  document.getElementById('cm-tabs').innerHTML=['7j','1m','6m','1an'].map(t=>`
+    <div class="cm-tab${t===_chartPeriod?' active':''}" onclick="switchChartPeriod('${t}')">${t}</div>`).join('');
+}
+window.switchChartPeriod=function(p){
+  _chartPeriod=p; _renderChartTabs(); _drawChart(_chartCat,p);
+};
+
+// ─── 5. OVERRIDE buildCard pour ajouter bouton graphique ──
+(function(){
+  const _orig=window.buildCard||buildCard;
+  window.buildCard=function(a){
+    let html=_orig(a);
+    if(!CHART_CFG[a.cat]) return html;
+    // Insert chart button before last </div>`
+    const insertBefore='</div>`';
+    const lastIdx=html.lastIndexOf(insertBefore);
+    if(lastIdx===-1) return html;
+    const btn=`<div class="chart-btn"><button onclick="event.stopPropagation();openChart('${a.cat}')">📈 Voir l'évolution du prix</button></div>`;
+    return html.slice(0,lastIdx)+btn+html.slice(lastIdx);
+  };
+})();
+
+// ─── 6. TOAST ─────────────────────────────
+const _ICONS={semeuse:'⚜️',franc:'🪙',hercule:'💪',lingot:'🔩',napoleon:'👑',piece:'🌍',montre:'⌚',billet:'💶',lego:'🧱',jeux:'🎮',pokemon:'⚡',bd:'📖',vintage:'🏺',vinyle:'🎵',sneakers:'👟'};
+const _SRCS={lbc:'LBC',vint:'Vinted',ebay:'eBay'};
+
+function showToast(a,dur){
+  dur=dur||9000;
+  const r=roi(a),p=profit(a),urgent=r>=35&&p>=30;
+  const toast=document.createElement('div');
+  toast.className='vf-toast'+(urgent?' urgent':'');
+  toast.innerHTML=`
+    <div class="ti">${_ICONS[a.cat]||'🪙'}</div>
+    <div class="tb">
+      <div class="tl${urgent?' u':''}">${urgent?'🔥 Opportunité chaude':'✦ Nouvelle annonce'}</div>
+      <div class="tt">${a.title}</div>
+      <div class="tm">
+        <span>${_SRCS[a.src]||a.src}</span>
+        <span>${fmt(a.prix)}€ + ${fmt(a.fraisPort)}€ port</span>
+        <span class="tr${urgent?' u':''}">ROI +${r}%</span>
+        <span>+${fmt(p)}€ net</span>
+      </div>
+      <div class="tp"><div class="tpf${urgent?' u':''}" style="width:100%;"></div></div>
+    </div>
+    <div class="tc" onclick="this.closest('.vf-toast').remove()">✕</div>`;
+  toast.addEventListener('click',e=>{
+    if(e.target.classList.contains('tc')) return;
+    navigate('flux'); setTimeout(()=>openModal(a.id),120); _removeToast(toast);
+  });
+  _tc.appendChild(toast);
+  playPop(urgent);
+  const fill=toast.querySelector('.tpf');
+  requestAnimationFrame(()=>{ fill.style.transition=`width ${dur}ms linear`; fill.style.width='0%'; });
+  const timer=setTimeout(()=>_removeToast(toast),dur);
+  toast.dataset.timer=String(timer);
+}
+function _removeToast(t){ if(!t.parentNode) return; clearTimeout(+t.dataset.timer); t.classList.add('fading'); setTimeout(()=>t.remove(),320); }
+
+// ─── 7. POOL D'ANNONCES SIMULÉES ──────────
+const NEW_TEMPLATES=[
+  {title:"5F Semeuse 1898 argent — état SUP rare",cat:"semeuse",src:"lbc",prix:8,fraisPort:3,revente:18,frais:1,poids:"5g",titre:"835‰",poidsG:5,metal:"argent",valNumis:18,auth:93,etat:"SUP",hot:true,
+   valExplication:"5F Semeuse 1898 en SUP est une année rare. Cote entre 15 et 25€. Valeur métal ~4,5€.",
+   authRaison:"État SUP bien visible sur photo. Pièce courante, faux rarissimes.",
+   url:"https://www.leboncoin.fr/recherche?text=5+francs+semeuse+argent",urlRevente:"https://www.delcampe.net/fr/collections/monnaies/france/",urlRef:"https://www.cgbfr.com/5-francs-semeuse-argent"},
+  {title:"Lot 5 × 100F Hercule argent 900‰",cat:"hercule",src:"lbc",prix:110,fraisPort:6,revente:185,frais:8,poids:"5×15g",titre:"900‰",poidsG:75,metal:"argent",valNumis:185,auth:95,etat:"TTB+ à SUP",hot:true,
+   valExplication:"100F Hercule à 22€/pièce = sous la cote. Valeur unitaire TTB+ : 30 à 45€. Lot de 5 = 150 à 200€.",
+   authRaison:"Pièces 5ème République, quasi-impossible à contrefaire.",
+   url:"https://www.leboncoin.fr/recherche?text=100+francs+hercule+argent",urlRevente:"https://www.cgbfr.com/boutique/monnaies_francaises_5eme_republique/",urlRef:"https://www.cgbfr.com/100-francs-hercule-1964-1980"},
+  {title:"20F Napoléon Ier 1812 A or — rare",cat:"napoleon",src:"ebay",prix:295,fraisPort:7,revente:450,frais:15,poids:"6.45g",titre:"900‰",poidsG:6.45,metal:"or",valNumis:480,auth:76,etat:"TTB",hot:true,
+   valExplication:"20F Napoléon 1812 Paris = émission rare. Cote 400-600€ en TTB. Valeur métal or ~516€.",
+   authRaison:"Pièce ancienne à vérifier. Demander photos HD, poids exact 6.45g.",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=20+francs+napoleon+or+1812",urlRevente:"https://www.goldunion.fr/vendre-or/",urlRef:"https://www.cgbfr.com/20-francs-napoleon-ier"},
+  {title:"Billet 500F Molière 1959 — lettre rare",cat:"billet",src:"ebay",prix:22,fraisPort:3,revente:95,frais:5,poids:"—",titre:"Papier monnaie",poidsG:0,metal:"autre",valNumis:95,auth:85,etat:"TTB+",hot:true,
+   valExplication:"500F Molière lettre rare en TTB+ = 80 à 120€. Cote catalogue 150€ en SUP. À 25€ total = ×3,8 minimum.",
+   authRaison:"Vérifier filigrane Molière par transparence, impression taille-douce au toucher.",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=billet+500+francs+moliere+1959",urlRevente:"https://www.delcampe.net/fr/collections/billets/france/",urlRef:"https://www.numismondo.fr/pm/fra/"},
+  {title:"Lot Game Boy Color + Pokémon Or + Cristal",cat:"jeux",src:"lbc",prix:55,fraisPort:7,revente:170,frais:10,poids:"—",titre:"Rétrogaming",poidsG:0,metal:"autre",valNumis:170,auth:91,etat:"Fonctionnel",hot:true,
+   valExplication:"GBC 40-60€ + Pokémon Or 60-90€ + Cristal 50-80€. Total 150-230€. À 62€ = ×2,7.",
+   authRaison:"GBC difficile à contrefaire. Pokémon : vérifier que la sauvegarde fonctionne.",
+   url:"https://www.leboncoin.fr/recherche?text=game+boy+color+pokemon+or+cristal",urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=game+boy+color+pokemon",urlRef:"https://www.pricecharting.com/"},
+  {title:"Super Nintendo SNES + Mario World + DK Country",cat:"jeux",src:"lbc",prix:75,fraisPort:10,revente:195,frais:14,poids:"—",titre:"Rétrogaming",poidsG:0,metal:"autre",valNumis:195,auth:90,etat:"Fonctionnel",hot:true,
+   valExplication:"SNES 60-90€ + Mario World boîte 40€ + DK Country 25€. Total estimé 180-230€. À 85€ = ×2,3.",
+   authRaison:"Console visible allumée = fonctionnel. Jeux PAL authentiques.",
+   url:"https://www.leboncoin.fr/recherche?text=super+nintendo+snes+mario+world",urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=super+nintendo+snes+lot",urlRef:"https://www.pricecharting.com/"},
+  {title:"Dracaufeu Holographique Base Set FR",cat:"pokemon",src:"ebay",prix:65,fraisPort:4,revente:210,frais:10,poids:"—",titre:"Carte rare",poidsG:0,metal:"autre",valNumis:210,auth:72,etat:"Bon état",hot:true,
+   valExplication:"Dracaufeu Base Set FR non gradé bon état = 120-250€. Gradé PSA 8 = 400-800€. À 69€ = +140€ min.",
+   authRaison:"Très contrefait. Vérifier hologramme, texture, texte français d'époque. Demander vidéo lumière naturelle.",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=dracaufeu+holographique+base+set+francais",urlRevente:"https://www.cardmarket.com/fr/Pokemon",urlRef:"https://www.cardmarket.com/fr/Pokemon"},
+  {title:"Lot 300 cartes Pokémon vintage non triées FR",cat:"pokemon",src:"lbc",prix:38,fraisPort:5,revente:200,frais:12,poids:"—",titre:"Collection",poidsG:0,metal:"autre",valNumis:200,auth:76,etat:"Variable",hot:true,
+   valExplication:"300 cartes non triées = 2-3 rares holo minimum. Ronflex holo + semi-rares = 60€+. Dracaufeu = jackpot.",
+   authRaison:"Demander photo des cartes rares. FR 1999-2001 quasi-impossibles à contrefaire.",
+   url:"https://www.leboncoin.fr/recherche?text=lot+cartes+pokemon+vintage",urlRevente:"https://www.cardmarket.com/fr/Pokemon",urlRef:"https://www.cardmarket.com/fr/Pokemon"},
+  {title:"Tintin au Tibet EO 1960 — état TTB+",cat:"bd",src:"lbc",prix:26,fraisPort:5,revente:115,frais:7,poids:"—",titre:"BD ancienne",poidsG:0,metal:"autre",valNumis:115,auth:85,etat:"TTB+",hot:true,
+   valExplication:"Tintin au Tibet EO 1960 TTB+ = 100-180€. Casterman EO identifiable par le prix en couverture. À 31€ = ×3,7.",
+   authRaison:"Vérifier dépôt légal 1960 page intérieure, éditeur Casterman, dos non restauré.",
+   url:"https://www.leboncoin.fr/recherche?text=tintin+tibet+edition+originale",urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=tintin+tibet+edition+originale",urlRef:"https://www.bdnet.com/bd/tintin/"},
+  {title:"Leica M6 TTL chrome + Elmarit 28mm",cat:"vintage",src:"lbc",prix:890,fraisPort:20,revente:2100,frais:80,poids:"—",titre:"Photo argentique",poidsG:0,metal:"autre",valNumis:2200,auth:83,etat:"Très bon état",hot:true,
+   valExplication:"M6 TTL chrome 1200-1800€ + Elmarit 28mm 400-700€. Kit = 1800-2600€. À 910€ = ×2,3.",
+   authRaison:"Numéro de série vérifiable sur leica.com. Obturateur testé à toutes vitesses.",
+   url:"https://www.leboncoin.fr/recherche?text=leica+m6+ttl+elmarit",urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=leica+m6+ttl",urlRef:"https://www.leica-camera.com/fr-FR"},
+  {title:"Platine Thorens TD-160 + cellule Shure M95",cat:"vinyle",src:"lbc",prix:115,fraisPort:15,revente:305,frais:20,poids:"—",titre:"Hifi vintage",poidsG:0,metal:"autre",valNumis:320,auth:88,etat:"Fonctionnel",hot:true,
+   valExplication:"Thorens TD-160 révisée + Shure M95 = 300-450€. Cellule seule vaut 80-120€. À 130€ = ×2,3.",
+   authRaison:"Vérifier que la courroie tourne sans bruit, aiguille intacte. Demander vidéo avec disque.",
+   url:"https://www.leboncoin.fr/recherche?text=thorens+td+160+platine+vinyle",urlRevente:"https://www.ebay.fr/sch/i.html?_nkw=thorens+td160",urlRef:"https://www.discogs.com/fr/sell/list"},
+  {title:"Nike Air Jordan 1 Chicago 2015 DS taille 42",cat:"sneakers",src:"vint",prix:280,fraisPort:10,revente:650,frais:30,poids:"—",titre:"Sneakers",poidsG:0,metal:"autre",valNumis:680,auth:74,etat:"Deadstock",hot:true,
+   valExplication:"AJ1 Chicago 2015 DS taille 42 = 600-850€ StockX. À 290€ total = ×2,3 net.",
+   authRaison:"Vérifier broderie AIR JORDAN languette, coutures intérieures, semelle air. App CheckCheck obligatoire.",
+   url:"https://www.vinted.fr/catalog?search_text=air+jordan+1+chicago+2015",urlRevente:"https://stockx.com/sell",urlRef:"https://stockx.com/air-jordan-1-retro-high-og-chicago-2015"},
+  {title:"2F Semeuse 1908 argent — millésime recherché",cat:"semeuse",src:"ebay",prix:9,fraisPort:2.5,revente:24,frais:1,poids:"10g",titre:"835‰",poidsG:10,metal:"argent",valNumis:24,auth:91,etat:"SUP",hot:true,
+   valExplication:"2F Semeuse 1908 = millésime rare (faible tirage). Cote 18-30€ en SUP. Valeur métal ~8,7€.",
+   authRaison:"Vérifier poids exact 10g et sonnerie argent. 1908 = date notable à authentifier.",
+   url:"https://www.ebay.fr/sch/i.html?_nkw=2+francs+semeuse+1908+argent",urlRevente:"https://www.delcampe.net/fr/collections/monnaies/france/",urlRef:"https://www.cgbfr.com/2-francs-semeuse-argent"},
+  {title:"Miles Davis Kind of Blue LP Columbia 1959",cat:"vinyle",src:"lbc",prix:35,fraisPort:8,revente:175,frais:10,poids:"—",titre:"Disques",poidsG:0,metal:"autre",valNumis:195,auth:75,etat:"VG+",hot:true,
+   valExplication:"Kind of Blue pressage Two-Eye 1959 = 120-300€ selon état. VG+ = très bon pour 65 ans. À 43€ = ×4.",
+   authRaison:"Vérifier étiquette Two-Eye Columbia. Écouter 5min pour vérifier absence de scratches.",
+   url:"https://www.leboncoin.fr/recherche?text=miles+davis+kind+of+blue+vinyl",urlRevente:"https://www.discogs.com/sell/list",urlRef:"https://www.discogs.com/"},
+  {title:"Omega Seamaster 1969 cal.565 cadran bleu",cat:"montre",src:"lbc",prix:280,fraisPort:8,revente:650,frais:30,poids:"—",titre:"Automatique cal.565",poidsG:0,metal:"autre",valNumis:700,auth:75,etat:"Révisé 2022",hot:true,
+   valExplication:"Omega Seamaster vintage cal.565 révisé = 600-900€. Cadran bleu original = prime. À 288€ = ×2,3.",
+   authRaison:"Vérifier numéro série sur myOmega.com. Cadran non repeint = critère clé. Achat en main recommandé.",
+   url:"https://www.leboncoin.fr/recherche?text=omega+seamaster+vintage+automatique",urlRevente:"https://www.chrono24.fr/omega/seamaster--id3182.htm",urlRef:"https://www.chrono24.fr/omega/seamaster--id3182.htm"},
+];
+
+// ─── 8. FILTRES NOTIFS ────────────────────
+const NOTIF_ALLOWED_CATS=['semeuse','franc','hercule','napoleon','lingot','piece','billet','jeux','pokemon','bd','vintage','vinyle','sneakers'];
+const NOTIF_ROI_MIN=28;
+const NOTIF_PROFIT_MIN=18;
+
+function isNotifWorthy(a){
+  if(!NOTIF_ALLOWED_CATS.includes(a.cat)) return false;
+  return roi(a)>=NOTIF_ROI_MIN && profit(a)>=NOTIF_PROFIT_MIN;
+}
+
+// ─── 9. INJECTION ANNONCES ────────────────
+let newId=300, newCount=0, scanTimer;
+
+function injectNewArticle(){
+  const pool=NEW_TEMPLATES.filter(t=>NOTIF_ALLOWED_CATS.includes(t.cat));
+  if(!pool.length) return;
+  const tpl=pool[Math.floor(Math.random()*pool.length)];
+  const a=Object.assign({},tpl,{
+    id:newId++,
+    age:"À l'instant",
+    frais:tpl.frais||Math.round((tpl.prix+tpl.fraisPort)*.06),
+    isNew:true
+  });
+
+  if(!isNotifWorthy(a)) return;
+
+  ARTICLES.unshift(a);
+  newCount++;
+
+  // Badge nav
+  const nb=document.getElementById('nb-flux');
+  if(nb){ nb.textContent=newCount; nb.classList.remove('nbanim'); void nb.offsetWidth; nb.classList.add('nbanim'); }
+
+  // Banner
+  const banner=document.querySelector('#page-flux .alert-banner');
+  if(banner) banner.textContent=`✦ ${newCount} opportunité${newCount>1?'s':''} détectée${newCount>1?'s':''} — ROI +${Math.round(roi(a))}% — Profit net +${fmt(profit(a))}€`;
+
+  // Injecter carte dans le flux si visible
+  const fluxPage=document.getElementById('page-flux');
+  if(fluxPage&&fluxPage.classList.contains('active')){
+    const activeChip=document.querySelector('#flux-chips .chip.active');
+    const curFilter=activeChip?activeChip.dataset.filter:'all';
+    if(curFilter==='all'||curFilter===a.cat){
+      const listEl=document.getElementById('flux-list');
+      if(listEl){
+        const tmp=document.createElement('div');
+        tmp.innerHTML=window.buildCard(a);
+        const card=tmp.firstElementChild;
+        if(card){
+          card.classList.add('nc');
+          const badge=document.createElement('div'); badge.className='nbadge'; badge.textContent='nouveau';
+          card.appendChild(badge);
+          setTimeout(()=>badge.remove(),10000);
+          setTimeout(()=>card.classList.remove('nc'),600);
+          listEl.insertBefore(card,listEl.firstChild);
+        }
+      }
+    }
+  }
+
+  renderTop();
+  showToast(a,10000);
+  showScanPulse();
+}
+
+// ─── 10. SCAN INSTANTANÉ ─────────────────
+// Premier pop après 3 secondes, puis toutes les 12-20s
+setTimeout(()=>{ injectNewArticle(); scheduleScan(); }, 3000);
+
+function scheduleScan(){
+  const delay=12000+Math.random()*8000; // 12-20s
+  scanTimer=setTimeout(()=>{ injectNewArticle(); scheduleScan(); }, delay);
+}
+
+// ─── 11. CONNEXION AU SCRAPER PYTHON (si lancé) ──────────
+// Tente de se connecter à http://localhost:5001
+// Si le scraper tourne → remplace les données simulées par les VRAIES annonces
+let scraperConnected = false;
+let lastScraperCheck = 0;
+const SCRAPER_URL = 'http://localhost:5001';
+
+async function tryConnectScraper(){
+  try {
+    const res = await fetch(SCRAPER_URL+'/api/status', {signal: AbortSignal.timeout(1500)});
+    if(!res.ok) return false;
+    const status = await res.json();
+    if(!scraperConnected){
+      scraperConnected = true;
+      // Mettre à jour les cours métaux depuis le scraper
+      if(status.silver_g) SILVER_G = status.silver_g;
+      if(status.gold_g)   GOLD_G   = status.gold_g;
+      // Afficher badge connecté
+      showScraperBadge(true);
+      console.log('✅ Scraper Python connecté — vraies annonces activées');
+    }
+    return true;
+  } catch(e) {
+    if(scraperConnected){
+      scraperConnected = false;
+      showScraperBadge(false);
+    }
+    return false;
+  }
+}
+
+function showScraperBadge(connected){
+  let badge = document.getElementById('scraper-badge');
+  if(!badge){
+    badge = document.createElement('div');
+    badge.id = 'scraper-badge';
+    badge.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9000;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;font-size:11px;font-family:"DM Mono",monospace;display:flex;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.4);';
+    document.body.appendChild(badge);
+  }
+  if(connected){
+    badge.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;display:inline-block;"></span> <span style="color:var(--green);">Scraper actif — vraies annonces</span>';
+    badge.style.borderColor = 'var(--green-bdr)';
+  } else {
+    badge.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:var(--text3);display:inline-block;"></span> <span style="color:var(--text3);">Mode simulation</span>';
+    badge.style.borderColor = 'var(--border2)';
+  }
+}
+
+async function fetchRealArticles(){
+  if(!scraperConnected) return;
+  try {
+    const res = await fetch(SCRAPER_URL+'/api/articles/new', {signal: AbortSignal.timeout(3000)});
+    if(!res.ok) return;
+    const items = await res.json();
+    for(const item of items){
+      // Convertir le format scraper → format ARTICLES
+      const a = {
+        id:       item.id + 5000, // éviter collision avec IDs existants
+        title:    item.titre,
+        cat:      item.cat,
+        src:      item.plateforme,
+        prix:     item.prix,
+        fraisPort:item.fraisPort,
+        revente:  item.revente,
+        frais:    Math.round((item.prix + item.fraisPort) * 0.06),
+        age:      item.age,
+        hot:      item.roi >= 35,
+        desc:     `Annonce réelle détectée automatiquement. ROI estimé : +${item.roi}%.${item.ville?' Localisation : '+item.ville+'.':''}`,
+        poids:    '—',
+        titre:    '—',
+        poidsG:   0,
+        metal:    'autre',
+        valSpot:  null,
+        valNumis: item.valReelle,
+        auth:     item.auth || 80,
+        etat:     'Voir l\'annonce',
+        authRaison: 'Annonce détectée par le scanner automatique. Vérifier les photos, la description et le feedback vendeur avant achat.',
+        valExplication: `Prix annonce : ${item.prix}€ + port ${item.fraisPort}€. Valeur estimée : ${item.valReelle}€. Profit net estimé : +${item.profit}€ (ROI ${item.roi}%).`,
+        url:       item.lien,      // ← VRAI LIEN DIRECT du produit
+        urlRevente:'https://www.leboncoin.fr/deposer-une-annonce',
+        urlRef:    item.lien,
+        image:     item.image || null,
+        isNew:     true,
+        isReal:    true,           // marqué comme vraie annonce
+      };
+
+      // Vérifier qu'on n'a pas déjà cet article
+      if(ARTICLES.find(x=>x.url===a.url)) continue;
+
+      ARTICLES.unshift(a);
+      newCount++;
+
+      // Badge nav
+      const nb=document.getElementById('nb-flux');
+      if(nb){ nb.textContent=newCount; nb.classList.remove('nbanim'); void nb.offsetWidth; nb.classList.add('nbanim'); }
+
+      // Injecter dans le flux
+      const fluxPage=document.getElementById('page-flux');
+      if(fluxPage&&fluxPage.classList.contains('active')){
+        const chip=document.querySelector('#flux-chips .chip.active');
+        const cf=chip?chip.dataset.filter:'all';
+        if(cf==='all'||cf===a.cat){
+          const listEl=document.getElementById('flux-list');
+          if(listEl){
+            const tmp=document.createElement('div');
+            tmp.innerHTML=window.buildCard(a);
+            const card=tmp.firstElementChild;
+            if(card){
+              // Badge spécial "RÉEL" pour les vraies annonces
+              card.style.borderColor='var(--gold)';
+              const badge=document.createElement('div');
+              badge.style.cssText='position:absolute;top:-1px;right:12px;background:var(--gold);color:#000;font-size:9px;font-weight:800;letter-spacing:.08em;padding:2px 8px;border-radius:0 0 6px 6px;font-family:"DM Mono",monospace;';
+              badge.textContent='🔴 RÉEL';
+              card.appendChild(badge);
+              setTimeout(()=>badge.remove(),30000);
+              listEl.insertBefore(card,listEl.firstChild);
+            }
+          }
+        }
+      }
+
+      // Toast doré pour vraie annonce
+      const r=Math.round(item.roi), p=item.profit;
+      const toast=document.createElement('div');
+      toast.className='vf-toast urgent';
+      toast.style.borderLeftColor='var(--gold)';
+      toast.innerHTML=`
+        <div class="ti">${{semeuse:'⚜️',franc:'🪙',hercule:'💪',lingot:'🔩',napoleon:'👑',piece:'🌍',montre:'⌚',billet:'💶',lego:'🧱',jeux:'🎮',pokemon:'⚡',bd:'📖',vintage:'🏺',vinyle:'🎵',sneakers:'👟'}[item.cat]||'🪙'}</div>
+        <div class="tb">
+          <div class="tl u" style="color:var(--gold);">🔴 VRAIE ANNONCE DÉTECTÉE</div>
+          <div class="tt">${item.titre}</div>
+          <div class="tm">
+            <span style="color:var(--gold);font-weight:600;">${{lbc:'LeBonCoin',ebay:'eBay',vint:'Vinted'}[item.plateforme]||item.plateforme}</span>
+            <span>${item.prix}€ + ${item.fraisPort}€ port</span>
+            <span class="tr u">ROI +${r}%</span>
+            <span>+${p}€ net</span>
+          </div>
+          <div class="tp"><div class="tpf u" style="width:100%;background:var(--gold);"></div></div>
+        </div>
+        <div class="tc" onclick="this.closest('.vf-toast').remove()">✕</div>`;
+      toast.addEventListener('click',e=>{
+        if(e.target.classList.contains('tc')) return;
+        window.open(item.lien,'_blank');
+        _removeToast(toast);
+      });
+      _tc.appendChild(toast);
+      playPop(true);
+      const fill=toast.querySelector('.tpf');
+      requestAnimationFrame(()=>{ fill.style.transition='width 15000ms linear'; fill.style.width='0%'; });
+      const timer=setTimeout(()=>_removeToast(toast),15000);
+      toast.dataset.timer=String(timer);
+    }
+  } catch(e) {
+    // Scraper pas disponible
+  }
+}
+
+// Vérifier connexion scraper toutes les 5s, fetch nouvelles annonces toutes les 10s
+setInterval(tryConnectScraper, 5000);
+setInterval(fetchRealArticles,  10000);
+tryConnectScraper(); // Test immédiat au démarrage
+showScraperBadge(false); // Afficher "Mode simulation" par défaut
+
+</script>
+</body>
+</html>
