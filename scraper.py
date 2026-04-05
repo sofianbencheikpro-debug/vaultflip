@@ -419,11 +419,16 @@ def scan_loop():
 def is_recent(a):
     """Vérifie si une annonce est de moins de MAX_AGE_H heures."""
     try:
-        ts = datetime.fromisoformat(a["timestamp"])
-        age_h = (datetime.now(ts.tzinfo) - ts).total_seconds() / 3600
+        ts_str = a.get("timestamp","")
+        if not ts_str:
+            return True  # Pas de timestamp = on garde
+        # Normaliser le timezone
+        ts_str = ts_str.replace('+00:00','').replace('Z','')
+        ts = datetime.fromisoformat(ts_str)
+        age_h = (datetime.utcnow() - ts).total_seconds() / 3600
         return age_h <= MAX_AGE_H
     except:
-        return False
+        return True  # En cas d'erreur on garde l'annonce
 
 def cleanup_old():
     """Supprime les annonces trop vieilles du stock."""
@@ -436,7 +441,7 @@ def cleanup_old():
 
 @app.route("/api/articles")
 def api_articles():
-    cleanup_old()  # Nettoyer avant de servir
+    cleanup_old()
     limit = min(int(request.args.get("limit",50)),200)
     cat = request.args.get("cat")
     with lock:
