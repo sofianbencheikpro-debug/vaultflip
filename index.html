@@ -677,7 +677,7 @@ body{
         <span class="ticker-name">Or · XAU/EUR</span>
         <span class="ticker-change up" id="sb-gold-chg">+0.42%</span>
       </div>
-      <div class="ticker-price gold-price" id="sb-gold-g">89,24 €/g</div>
+      <div class="ticker-price gold-price" id="sb-gold-g">129,25 €/g</div>
       <div class="ticker-sub">
         <span id="sb-gold-oz">2 777 €/oz</span>
         <span><span class="live-dot"></span> direct</span>
@@ -688,7 +688,7 @@ body{
         <span class="ticker-name">Argent · XAG/EUR</span>
         <span class="ticker-change up" id="sb-silver-chg">+0.18%</span>
       </div>
-      <div class="ticker-price silver-price" id="sb-silver-g">0,93 €/g</div>
+      <div class="ticker-price silver-price" id="sb-silver-g">3,12 €/g</div>
       <div class="ticker-sub">
         <span id="sb-silver-oz">28,95 €/oz</span>
         <span><span class="live-dot"></span> direct</span>
@@ -727,7 +727,7 @@ body{
       <div class="topbar-crumb" id="tb-crumb">annonces par ordre d'arrivée</div>
     </div>
     <div class="topbar-right">
-      <div class="topbar-metal tb-gold">Au <span id="tb-gold">89,24</span> €/g</div>
+      <div class="topbar-metal tb-gold">Au <span id="tb-gold">129,25</span> €/g</div>
       <div class="topbar-metal tb-silver">Ag <span id="tb-silver">0,93</span> €/g</div>
       <button id="sound-btn" onclick="toggleSound()" title="Activer/Désactiver le son des notifications" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:5px 12px;color:var(--text2);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;transition:all .15s;">🔔 Son ON</button>
       <div class="scan-badge"><span class="live-dot"></span>Scan actif</div>
@@ -740,7 +740,7 @@ body{
     <div style="display:flex;align-items:center;gap:6px;">
       <button id="sound-btn-mob" onclick="toggleSound()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:4px 10px;color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;">🔔</button>
     <div class="mob-metals">
-      <div class="mob-metal mob-au">Au <span id="mob-gold">89,24</span>€</div>
+      <div class="mob-metal mob-au">Au <span id="mob-gold">129,25</span>€</div>
       <div class="mob-metal mob-ag">Ag <span id="mob-silver">0,93</span>€</div>
     </div>
     </div>
@@ -809,12 +809,12 @@ body{
         <div class="spot-bar-metals">
           <div class="spot-metal">
             <div class="spot-metal-name">Or · XAU</div>
-            <div class="spot-metal-val gld" id="port-gold-g">89,24 €/g</div>
+            <div class="spot-metal-val gld" id="port-gold-g">129,25 €/g</div>
             <div class="spot-metal-sub" id="port-gold-oz">= 2 777 €/oz</div>
           </div>
           <div class="spot-metal">
             <div class="spot-metal-name">Argent · XAG</div>
-            <div class="spot-metal-val slv" id="port-silver-g">0,93 €/g</div>
+            <div class="spot-metal-val slv" id="port-silver-g">3,12 €/g</div>
             <div class="spot-metal-sub" id="port-silver-oz">= 28,95 €/oz</div>
           </div>
         </div>
@@ -984,7 +984,7 @@ body{
 // DONNÉES COURS MÉTAUX (simulées live)
 // ══════════════════════════════════════════
 let GOLD_G  = 89.24;
-let SILVER_G = 0.931;
+let SILVER_G = 3.121;
 const OZ = 31.1035;
 
 function fmtPrice(n){ return n.toFixed(2).replace('.',','); }
