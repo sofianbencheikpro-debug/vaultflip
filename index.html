@@ -1823,7 +1823,7 @@ function showToast(a,dur){
 function _removeToast(t){ if(!t.parentNode) return; clearTimeout(+t.dataset.timer); t.classList.add('fading'); setTimeout(()=>t.remove(),320); }
 
 // ─── 7. POOL D'ANNONCES SIMULÉES ──────────
-const NEW_TEMPLATES=[]; // Plus de fausses annonces
+const NEW_TEMPLATES=[]; // Désactivé — vraies annonces uniquement
 
 // ─── 8. FILTRES NOTIFS ────────────────────
 const NOTIF_ALLOWED_CATS=['semeuse','franc','hercule','napoleon','lingot','piece','billet','jeux','pokemon','bd','vintage','vinyle','sneakers'];
@@ -1833,70 +1833,6 @@ const NOTIF_PROFIT_MIN=18;
 function isNotifWorthy(a){
   if(!NOTIF_ALLOWED_CATS.includes(a.cat)) return false;
   return roi(a)>=NOTIF_ROI_MIN && profit(a)>=NOTIF_PROFIT_MIN;
-}
-
-// ─── 9. INJECTION ANNONCES ────────────────
-let newId=300, newCount=0, scanTimer;
-
-function injectNewArticle(){
-  const pool=NEW_TEMPLATES.filter(t=>NOTIF_ALLOWED_CATS.includes(t.cat));
-  if(!pool.length) return;
-  const tpl=pool[Math.floor(Math.random()*pool.length)];
-  const a=Object.assign({},tpl,{
-    id:newId++,
-    age:"À l'instant",
-    frais:tpl.frais||Math.round((tpl.prix+tpl.fraisPort)*.06),
-    isNew:true
-  });
-
-  if(!isNotifWorthy(a)) return;
-
-  ARTICLES.unshift(a);
-  newCount++;
-
-  // Badge nav
-  const nb=document.getElementById('nb-flux');
-  if(nb){ nb.textContent=newCount; nb.classList.remove('nbanim'); void nb.offsetWidth; nb.classList.add('nbanim'); }
-
-  // Banner
-  const banner=document.querySelector('#page-flux .alert-banner');
-  if(banner) banner.textContent=`✦ ${newCount} opportunité${newCount>1?'s':''} détectée${newCount>1?'s':''} — ROI +${Math.round(roi(a))}% — Profit net +${fmt(profit(a))}€`;
-
-  // Injecter carte dans le flux si visible
-  const fluxPage=document.getElementById('page-flux');
-  if(fluxPage&&fluxPage.classList.contains('active')){
-    const activeChip=document.querySelector('#flux-chips .chip.active');
-    const curFilter=activeChip?activeChip.dataset.filter:'all';
-    if(curFilter==='all'||curFilter===a.cat){
-      const listEl=document.getElementById('flux-list');
-      if(listEl){
-        const tmp=document.createElement('div');
-        tmp.innerHTML=window.buildCard(a);
-        const card=tmp.firstElementChild;
-        if(card){
-          card.classList.add('nc');
-          const badge=document.createElement('div'); badge.className='nbadge'; badge.textContent='nouveau';
-          card.appendChild(badge);
-          setTimeout(()=>badge.remove(),10000);
-          setTimeout(()=>card.classList.remove('nc'),600);
-          listEl.insertBefore(card,listEl.firstChild);
-        }
-      }
-    }
-  }
-
-  renderTop();
-  showToast(a,10000);
-  showScanPulse();
-}
-
-// ─── 10. SCAN INSTANTANÉ ─────────────────
-// Premier pop après 3 secondes, puis toutes les 12-20s
-setTimeout(()=>{ injectNewArticle(); scheduleScan(); }, 3000);
-
-function scheduleScan(){
-  const delay=12000+Math.random()*8000; // 12-20s
-  scanTimer=setTimeout(()=>{ injectNewArticle(); scheduleScan(); }, delay);
 }
 
 // ─── 11. CONNEXION AU SCRAPER PYTHON (si lancé) ──────────
