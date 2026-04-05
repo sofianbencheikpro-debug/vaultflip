@@ -1991,41 +1991,47 @@ async function fetchRealArticles(){
     const res = await fetch(SCRAPER_URL+'/api/articles/new', {signal: AbortSignal.timeout(3000)});
     if(!res.ok) return;
     const items = await res.json();
+    let hasNew = false;
+
     for(const item of items){
       const a = convertScraperItem(item);
       if(!a) continue;
-
-      // Vérifier qu'on n'a pas déjà cet article
       if(ARTICLES.find(x=>x.url===a.url)) continue;
 
       ARTICLES.unshift(a);
       newCount++;
+      hasNew = true;
 
-      // Badge nav
+      // Badge nav — toujours mis à jour
       const nb=document.getElementById('nb-flux');
       if(nb){ nb.textContent=newCount; nb.classList.remove('nbanim'); void nb.offsetWidth; nb.classList.add('nbanim'); }
 
-      // Injecter dans le flux
-      const fluxPage=document.getElementById('page-flux');
-      if(fluxPage&&fluxPage.classList.contains('active')){
+      // Banner
+      const banner=document.querySelector('#page-flux .alert-banner');
+      if(banner) banner.textContent=`✦ ${newCount} opportunité${newCount>1?'s':''} détectée${newCount>1?'s':''} — ROI +${a.hot?'🔥 ':'+'}${Math.round(item.roi)}% — Profit +${item.profit}€`;
+
+      // INJECTER AUTOMATIQUEMENT dans le flux — même si on est sur un autre onglet
+      const listEl=document.getElementById('flux-list');
+      if(listEl){
+        // Supprimer le message "Scanner en cours" si présent
+        const emptyMsg = listEl.querySelector('div[style*="text-align:center"]');
+        if(emptyMsg) emptyMsg.remove();
+
         const chip=document.querySelector('#flux-chips .chip.active');
         const cf=chip?chip.dataset.filter:'all';
         if(cf==='all'||cf===a.cat){
-          const listEl=document.getElementById('flux-list');
-          if(listEl){
-            const tmp=document.createElement('div');
-            tmp.innerHTML=window.buildCard(a);
-            const card=tmp.firstElementChild;
-            if(card){
-              // Badge spécial "RÉEL" pour les vraies annonces
-              card.style.borderColor='var(--gold)';
-              const badge=document.createElement('div');
-              badge.style.cssText='position:absolute;top:-1px;right:12px;background:var(--gold);color:#000;font-size:9px;font-weight:800;letter-spacing:.08em;padding:2px 8px;border-radius:0 0 6px 6px;font-family:"DM Mono",monospace;';
-              badge.textContent='🔴 RÉEL';
-              card.appendChild(badge);
-              setTimeout(()=>badge.remove(),30000);
-              listEl.insertBefore(card,listEl.firstChild);
-            }
+          const tmp=document.createElement('div');
+          tmp.innerHTML=(window.buildCard||buildCard)(a);
+          const card=tmp.firstElementChild;
+          if(card){
+            card.style.borderColor='var(--gold)';
+            card.style.animation='newCardPop .5s cubic-bezier(.34,1.56,.64,1) both';
+            const badge=document.createElement('div');
+            badge.style.cssText='position:absolute;top:-1px;right:12px;background:var(--gold);color:#000;font-size:9px;font-weight:800;letter-spacing:.08em;padding:2px 8px;border-radius:0 0 6px 6px;font-family:"DM Mono",monospace;animation:bp 1s ease 3;';
+            badge.textContent='🔴 RÉEL';
+            card.appendChild(badge);
+            setTimeout(()=>badge.remove(),60000);
+            listEl.insertBefore(card,listEl.firstChild);
           }
         }
       }
