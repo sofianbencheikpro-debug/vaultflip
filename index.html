@@ -1020,45 +1020,43 @@ function displayMetals(){
   renderPortfolio();
 }
 
-async function fetchLiveMetals(){
-  // Utilise l'API gratuite gold-api.com (sans clé requise pour les cours de base)
-  // Convertit USD/oz → EUR/g avec taux de change en temps réel
-  try {
-    // Taux EUR/USD depuis une API gratuite
-    const fxRes = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR', {signal: AbortSignal.timeout(5000)});
-    const fxData = await fxRes.json();
-    const usdToEur = fxData.rates.EUR;
+// ⚠ Mets ta clé goldapi.io ici (gratuit sur goldapi.io)
+const GOLDAPI_KEY = 'goldapi-eiqt6msmnm41xhd-io';
 
-    // Prix or et argent en USD/oz depuis gold-api.com
+async function fetchLiveMetals(){
+  try {
+    const headers = { 'x-access-token': GOLDAPI_KEY, 'Content-Type': 'application/json' };
+
     const [goldRes, silverRes] = await Promise.all([
-      fetch('https://gold-api.com/price/XAU', {signal: AbortSignal.timeout(5000)}),
-      fetch('https://gold-api.com/price/XAG', {signal: AbortSignal.timeout(5000)}),
+      fetch('https://www.goldapi.io/api/XAU/EUR', {headers, signal: AbortSignal.timeout(6000)}),
+      fetch('https://www.goldapi.io/api/XAG/EUR', {headers, signal: AbortSignal.timeout(6000)}),
     ]);
 
     if(goldRes.ok){
-      const gData = await goldRes.json();
-      const newGold = +(gData.price * usdToEur / OZ).toFixed(4);
+      const d = await goldRes.json();
+      // goldapi.io retourne price en EUR/oz et price_gram_24k en EUR/g
+      const newGold = d.price_gram_24k || +(d.price / OZ).toFixed(4);
       if(newGold > 50 && newGold < 500){
         GOLD_G_PREV = GOLD_G;
-        GOLD_G = newGold;
+        GOLD_G = +newGold.toFixed(4);
       }
     }
     if(silverRes.ok){
-      const sData = await silverRes.json();
-      const newSilver = +(sData.price * usdToEur / OZ).toFixed(4);
+      const d = await silverRes.json();
+      const newSilver = d.price_gram_24k || +(d.price / OZ).toFixed(4);
       if(newSilver > 0.5 && newSilver < 20){
         SILVER_G_PREV = SILVER_G;
-        SILVER_G = newSilver;
+        SILVER_G = +newSilver.toFixed(4);
       }
     }
     displayMetals();
-    console.log(`Or: ${fmtPrice(GOLD_G)}€/g | Argent: ${fmtPrice(SILVER_G)}€/g (source: gold-api.com)`);
+    console.log(`✅ Or: ${fmtPrice(GOLD_G)}€/g | Argent: ${fmtPrice(SILVER_G)}€/g (goldapi.io)`);
   } catch(e){
-    // Fallback: fluctuation légère si API indisponible
+    // Fallback si API indisponible
     GOLD_G   *= 1 + (Math.random()-.5)*0.0005;
     SILVER_G *= 1 + (Math.random()-.5)*0.0005;
     displayMetals();
-    console.log('Cours API indisponible — utilisation des valeurs en cache');
+    console.log('goldapi.io indisponible — valeurs en cache');
   }
 }
 
