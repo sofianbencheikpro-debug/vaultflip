@@ -710,7 +710,7 @@ body{
   </div>
 
   <div class="sidebar-stats">
-    <div class="stat-mini"><span>Scan actif</span><span>toutes 5 min</span></div>
+    <div class="stat-mini"><span>Scan actif</span><span id="scan-freq-label">instantané</span></div>
     <div class="stat-mini"><span>Sources</span><span>LBC · Vinted · eBay · CDP</span></div>
     <div class="stat-mini"><span>Filtres</span><span>Argent uniquement</span></div>
     <div class="stat-mini"><span>Alertes</span><span style="color:var(--green)">actives</span></div>
@@ -2073,8 +2073,8 @@ async function fetchRealArticles(){
 }
 
 // Vérifier connexion scraper toutes les 5s, fetch nouvelles annonces toutes les 10s
-setInterval(tryConnectScraper, 5000);
-setInterval(fetchRealArticles,  5000); // Poll toutes les 5s pour être quasi-instantané
+setInterval(tryConnectScraper, 3000);
+setInterval(fetchRealArticles, 2000); // Poll toutes les 2s — quasi-instantané
 
 // Nettoyer les vieilles annonces toutes les 10 minutes
 setInterval(()=>{
