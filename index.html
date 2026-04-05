@@ -2068,7 +2068,23 @@ async function fetchRealArticles(){
 
 // Vérifier connexion scraper toutes les 5s, fetch nouvelles annonces toutes les 10s
 setInterval(tryConnectScraper, 5000);
-setInterval(fetchRealArticles,  10000);
+setInterval(fetchRealArticles,  5000); // Poll toutes les 5s pour être quasi-instantané
+
+// Nettoyer les vieilles annonces toutes les 10 minutes
+setInterval(()=>{
+  const before = ARTICLES.length;
+  // Garder uniquement les annonces ajoutées dans les dernières 6h
+  const cutoff = Date.now() - 6 * 3600 * 1000;
+  // On ne peut pas filtrer sans timestamp JS — on garde tout mais on trie par date
+  // et on limite à 200 annonces max
+  if(ARTICLES.length > 200){
+    ARTICLES.splice(200);
+    const after = ARTICLES.length;
+    if(before !== after){
+      renderFlux(document.querySelector('#flux-chips .chip.active')?.dataset.filter||'all');
+    }
+  }
+}, 600000);
 tryConnectScraper(); // Test immédiat au démarrage
 showScraperBadge(false); // Afficher "Mode simulation" par défaut
 
