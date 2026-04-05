@@ -432,6 +432,32 @@ def api_articles_new():
                   if datetime.fromisoformat(a["timestamp"]).timestamp() > cutoff]
     return jsonify(recent)
 
+@app.route("/api/push", methods=["POST"])
+def api_push():
+    """Reçoit les annonces envoyées par le scraper local (ton PC)."""
+    key = request.headers.get("X-Vaultflip-Key","")
+    if key != "vaultflip2024":
+        return jsonify({"error":"unauthorized"}), 401
+    try:
+        articles = request.get_json()
+        if not isinstance(articles, list):
+            return jsonify({"error":"expected array"}), 400
+        added = 0
+        with lock:
+            for a in articles:
+                if not a.get("lien") or a["lien"] in seen_urls:
+                    continue
+                seen_urls.add(a["lien"])
+                a["timestamp"] = datetime.now(timezone.utc).isoformat()
+                found_articles.insert(0, a)
+                stats["total_found"] += 1
+                added += 1
+            del found_articles[300:]
+        log.info(f"API push: {added} annonce(s) reçues du scraper local")
+        return jsonify({"added": added, "total": len(found_articles)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/status")
 def api_status():
     with lock: total = len(found_articles)
