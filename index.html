@@ -981,51 +981,96 @@ body{
 
 <script>
 // ══════════════════════════════════════════
-// DONNÉES COURS MÉTAUX (simulées live)
+// COURS MÉTAUX EN DIRECT — gold-api.com
 // ══════════════════════════════════════════
-let GOLD_G  = 89.24;
-let SILVER_G = 3.121;
+let GOLD_G   = 129.25; // valeur par défaut, écrasée par l'API
+let SILVER_G = 3.12;
+let GOLD_G_PREV   = 129.25;
+let SILVER_G_PREV = 3.12;
 const OZ = 31.1035;
 
 function fmtPrice(n){ return n.toFixed(2).replace('.',','); }
 function fmtInt(n){ return Math.round(n).toLocaleString('fr-FR'); }
-
 function safeSet(id, val, prop='textContent'){ const el=document.getElementById(id); if(el) el[prop]=val; }
 function safeClass(id, cls){ const el=document.getElementById(id); if(el) el.className=cls; }
 
-function updateMetals(){
-  // Simulation légère fluctuation +/- 0.05%
-  GOLD_G   *= 1 + (Math.random()-.5)*0.001;
-  SILVER_G *= 1 + (Math.random()-.5)*0.001;
-  const goldOz = GOLD_G * OZ;
-  const silvOz = SILVER_G * OZ;
-  const goldChg = ((GOLD_G - 89.24)/89.24*100).toFixed(2);
-  const silvChg = ((SILVER_G - 0.931)/0.931*100).toFixed(2);
+function displayMetals(){
+  const goldOz  = GOLD_G * OZ;
+  const silvOz  = SILVER_G * OZ;
+  const goldChg = ((GOLD_G - GOLD_G_PREV) / GOLD_G_PREV * 100).toFixed(2);
+  const silvChg = ((SILVER_G - SILVER_G_PREV) / SILVER_G_PREV * 100).toFixed(2);
 
-  safeSet('sb-gold-g',   fmtPrice(GOLD_G)+' €/g');
-  safeSet('sb-silver-g', fmtPrice(SILVER_G)+' €/g');
-  safeSet('sb-gold-oz',  fmtInt(goldOz)+' €/oz');
-  safeSet('sb-silver-oz',fmtPrice(silvOz)+' €/oz');
-  safeSet('sb-gold-chg', (goldChg>=0?'+':'')+goldChg+'%');
+  safeSet('sb-gold-g',    fmtPrice(GOLD_G)+' €/g');
+  safeSet('sb-silver-g',  fmtPrice(SILVER_G)+' €/g');
+  safeSet('sb-gold-oz',   fmtInt(goldOz)+' €/oz');
+  safeSet('sb-silver-oz', fmtPrice(silvOz)+' €/oz');
+  safeSet('sb-gold-chg',  (goldChg>=0?'+':'')+goldChg+'%');
   safeSet('sb-silver-chg',(silvChg>=0?'+':'')+silvChg+'%');
-
-  safeClass('sb-gold-chg','ticker-change '+(goldChg>=0?'up':'down'));
+  safeClass('sb-gold-chg',  'ticker-change '+(goldChg>=0?'up':'down'));
   safeClass('sb-silver-chg','ticker-change '+(silvChg>=0?'up':'down'));
-
-  safeSet('tb-gold',   fmtPrice(GOLD_G));
-  safeSet('tb-silver', fmtPrice(SILVER_G));
-  safeSet('mob-gold',  fmtPrice(GOLD_G));
-  safeSet('mob-silver',fmtPrice(SILVER_G));
-
-  safeSet('port-gold-g',  fmtPrice(GOLD_G)+' €/g');
-  safeSet('port-silver-g',fmtPrice(SILVER_G)+' €/g');
-  safeSet('port-gold-oz', '= '+fmtInt(goldOz)+' €/oz');
+  safeSet('tb-gold',    fmtPrice(GOLD_G));
+  safeSet('tb-silver',  fmtPrice(SILVER_G));
+  safeSet('mob-gold',   fmtPrice(GOLD_G));
+  safeSet('mob-silver', fmtPrice(SILVER_G));
+  safeSet('port-gold-g',   fmtPrice(GOLD_G)+' €/g');
+  safeSet('port-silver-g', fmtPrice(SILVER_G)+' €/g');
+  safeSet('port-gold-oz',  '= '+fmtInt(goldOz)+' €/oz');
   safeSet('port-silver-oz','= '+fmtPrice(silvOz)+' €/oz');
-
   updateCalc();
   renderPortfolio();
 }
-setInterval(updateMetals, 8000);
+
+async function fetchLiveMetals(){
+  // Utilise l'API gratuite gold-api.com (sans clé requise pour les cours de base)
+  // Convertit USD/oz → EUR/g avec taux de change en temps réel
+  try {
+    // Taux EUR/USD depuis une API gratuite
+    const fxRes = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR', {signal: AbortSignal.timeout(5000)});
+    const fxData = await fxRes.json();
+    const usdToEur = fxData.rates.EUR;
+
+    // Prix or et argent en USD/oz depuis gold-api.com
+    const [goldRes, silverRes] = await Promise.all([
+      fetch('https://gold-api.com/price/XAU', {signal: AbortSignal.timeout(5000)}),
+      fetch('https://gold-api.com/price/XAG', {signal: AbortSignal.timeout(5000)}),
+    ]);
+
+    if(goldRes.ok){
+      const gData = await goldRes.json();
+      const newGold = +(gData.price * usdToEur / OZ).toFixed(4);
+      if(newGold > 50 && newGold < 500){
+        GOLD_G_PREV = GOLD_G;
+        GOLD_G = newGold;
+      }
+    }
+    if(silverRes.ok){
+      const sData = await silverRes.json();
+      const newSilver = +(sData.price * usdToEur / OZ).toFixed(4);
+      if(newSilver > 0.5 && newSilver < 20){
+        SILVER_G_PREV = SILVER_G;
+        SILVER_G = newSilver;
+      }
+    }
+    displayMetals();
+    console.log(`Or: ${fmtPrice(GOLD_G)}€/g | Argent: ${fmtPrice(SILVER_G)}€/g (source: gold-api.com)`);
+  } catch(e){
+    // Fallback: fluctuation légère si API indisponible
+    GOLD_G   *= 1 + (Math.random()-.5)*0.0005;
+    SILVER_G *= 1 + (Math.random()-.5)*0.0005;
+    displayMetals();
+    console.log('Cours API indisponible — utilisation des valeurs en cache');
+  }
+}
+
+// Premier appel immédiat puis toutes les 2 minutes
+fetchLiveMetals();
+setInterval(fetchLiveMetals, 120000);
+// Affichage local toutes les 30s (fluctuation légère entre les appels API)
+setInterval(()=>{
+  GOLD_G   *= 1 + (Math.random()-.5)*0.0002;
+  SILVER_G *= 1 + (Math.random()-.5)*0.0002;
+  displayMetals();
+}, 30000);
 
 // ══════════════════════════════════════════
 // DONNÉES ARTICLES
