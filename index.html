@@ -2300,11 +2300,16 @@ function scheduleScan(){
 }
 
 // ─── 11. CONNEXION AU SCRAPER PYTHON (si lancé) ──────────
-// Tente de se connecter à http://localhost:5001
-// Si le scraper tourne → remplace les données simulées par les VRAIES annonces
+// ── URL du scraper Railway ──
+const SCRAPER_URL = (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === ''
+)
+  ? 'http://localhost:5001'
+  : 'https://web-production-e79dd.up.railway.app';
+
 let scraperConnected = false;
-let lastScraperCheck = 0;
-const SCRAPER_URL = 'http://localhost:5001';
 
 async function tryConnectScraper(){
   try {
