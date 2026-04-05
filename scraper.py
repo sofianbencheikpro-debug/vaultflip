@@ -416,16 +416,46 @@ def scan_loop():
 
 
 # ── API ────────────────────────────────────────────────────
+def is_recent(a):
+    """Vérifie si une annonce est de moins de MAX_AGE_H heures."""
+    try:
+        ts = datetime.fromisoformat(a["timestamp"])
+        age_h = (datetime.now(ts.tzinfo) - ts).total_seconds() / 3600
+        return age_h <= MAX_AGE_H
+    except:
+        return False
+
+def cleanup_old():
+    """Supprime les annonces trop vieilles du stock."""
+    with lock:
+        before = len(found_articles)
+        found_articles[:] = [a for a in found_articles if is_recent(a)]
+        removed = before - len(found_articles)
+        if removed > 0:
+            log.info(f"Nettoyage : {removed} annonce(s) > {MAX_AGE_H}h supprimée(s)")
+
 @app.route("/api/articles")
 def api_articles():
+    cleanup_old()  # Nettoyer avant de servir
     limit = min(int(request.args.get("limit",50)),200)
     cat = request.args.get("cat")
     with lock:
         items = [a for a in found_articles if not cat or a["cat"]==cat][:limit]
     return jsonify(items)
 
+@app.route("/api/clear", methods=["POST","GET"])
+def api_clear():
+    """Vide tout le stock — utile pour repartir à zéro."""
+    with lock:
+        n = len(found_articles)
+        found_articles.clear()
+        seen_urls.clear()
+    log.info(f"Stock vidé : {n} annonces supprimées")
+    return jsonify({"cleared": n})
+
 @app.route("/api/articles/new")
 def api_articles_new():
+    cleanup_old()
     cutoff = time.time() - 120
     with lock:
         recent = [a for a in found_articles
@@ -443,12 +473,17 @@ def api_push():
         if not isinstance(articles, list):
             return jsonify({"error":"expected array"}), 400
         added = 0
+        now = datetime.now(timezone.utc)
         with lock:
             for a in articles:
                 if not a.get("lien") or a["lien"] in seen_urls:
                     continue
+                # Vérifier l'âge de l'annonce avant de l'accepter
+                age_label = a.get("age", "")
+                if any(x in age_label for x in ["500h","150h","47h","29h","48h","72h","96h","120h"]):
+                    continue  # Trop vieille
                 seen_urls.add(a["lien"])
-                a["timestamp"] = datetime.now(timezone.utc).isoformat()
+                a["timestamp"] = now.isoformat()
                 found_articles.insert(0, a)
                 stats["total_found"] += 1
                 added += 1
