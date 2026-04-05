@@ -456,7 +456,7 @@ def api_clear():
 @app.route("/api/articles/new")
 def api_articles_new():
     cleanup_old()
-    cutoff = time.time() - 120
+    cutoff = time.time() - 1800  # 30 minutes
     with lock:
         recent = [a for a in found_articles
                   if datetime.fromisoformat(a["timestamp"]).timestamp() > cutoff]
