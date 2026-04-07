@@ -22,8 +22,8 @@ CORS(app)
 
 # ── Config Railway ────────────────────────────────────────
 PORT          = int(os.environ.get('PORT', 5001))
-ROI_MIN       = int(os.environ.get('ROI_MIN', 20))
-PROFIT_MIN    = int(os.environ.get('PROFIT_MIN', 12))
+ROI_MIN       = int(os.environ.get('ROI_MIN', 10))
+PROFIT_MIN    = int(os.environ.get('PROFIT_MIN', 5))
 SCAN_INTERVAL = int(os.environ.get('SCAN_INTERVAL', 35))
 SILVER_G      = float(os.environ.get('SILVER_G', 3.12))
 GOLD_G        = float(os.environ.get('GOLD_G', 129.25))
