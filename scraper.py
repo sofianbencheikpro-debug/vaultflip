@@ -221,13 +221,19 @@ def scrape_ebay_html(keywords, cat, val_ref, poids_g, titre_fin):
         if resp.status_code != 200: return results
 
         soup = BeautifulSoup(resp.text, "lxml")
-        for item in soup.select(".s-item")[:20]:
-            title_el = item.select_one(".s-item__title")
+        # Nouveau format eBay 2024+ : li.s-card dans ul.srp-results
+        items_sel = soup.select("li.s-card") or soup.select(".s-item")
+        for item in items_sel[:20]:
+            # Titre — nouveau sélecteur ou ancien
+            title_el = (item.select_one(".su-styled-text.primary.default") or
+                        item.select_one(".s-item__title"))
             if not title_el: continue
             titre_ad = title_el.get_text(strip=True)
-            if "Shop on eBay" in titre_ad: continue
+            if "Shop on eBay" in titre_ad or not titre_ad: continue
 
-            price_el = item.select_one(".s-item__price")
+            # Prix — nouveau sélecteur ou ancien
+            price_el = (item.select_one(".s-card__price") or
+                        item.select_one(".s-item__price"))
             if not price_el: continue
             try:
                 prix = float(re.sub(r"[^\d,.]", "", price_el.get_text(strip=True).split("à")[0]).replace(",", "."))
@@ -235,25 +241,29 @@ def scrape_ebay_html(keywords, cat, val_ref, poids_g, titre_fin):
                 continue
             if prix <= 0: continue
 
-            link_el = item.select_one("a.s-item__link")
+            # Lien — chercher href avec /itm/
+            link_el = (item.select_one("a[href*='/itm/']") or
+                       item.select_one("a.s-item__link"))
             if not link_el: continue
             href      = link_el.get("href", "")
-            item_id_m = re.search(r'/(\d{10,13})\?', href)
+            item_id_m = re.search(r'/itm/(\d{8,13})', href)
             if item_id_m:
                 lien = f"https://www.ebay.fr/itm/{item_id_m.group(1)}"
             else:
                 lien = href.split("?")[0] if href.startswith("http") else ""
             if not lien: continue
 
-            ship_el    = item.select_one(".s-item__shipping,.s-item__logisticsCost")
+            # Frais de port
             frais_port = 0.0
-            if ship_el:
-                st = ship_el.get_text(strip=True).lower()
-                if "gratuit" not in st:
+            for span in item.select("span"):
+                st = span.get_text(strip=True).lower()
+                if "livraison" in st and any(c.isdigit() for c in st):
                     m = re.search(r"[\d]+[,.]?[\d]*", st)
                     frais_port = float(m.group().replace(",", ".")) if m else 5.5
+                    break
 
-            img_el = item.select_one(".s-item__image-img")
+            img_el = (item.select_one("img[src*='ebayimg']") or
+                      item.select_one(".s-item__image-img"))
             img    = img_el.get("src", "") if img_el else ""
 
             a = make_article(titre_ad, prix, frais_port, lien, "ebay", cat, poids_g, titre_fin, img)
